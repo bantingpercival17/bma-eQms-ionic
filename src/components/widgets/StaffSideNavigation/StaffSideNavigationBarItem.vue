@@ -1,0 +1,83 @@
+<template>
+    <div class="mt-5">
+        <ion-accordion-group>
+            <ion-accordion v-for="(data, index) in items" :key="index">
+                <ion-item v-if="!data.child" slot="content">
+                    <router-link v-if="data.url" :to="data.url">
+                        <ion-label>{{ data.name }}</ion-label>
+                    </router-link>
+                </ion-item>
+                <template v-else>
+                    <ion-item slot="header">
+                        <ion-label>{{ data.name }}</ion-label>
+                    </ion-item>
+                    <ion-item v-for="(data1, index1) in data.child" :key="index1" class="ms-5 p-2" slot="content">
+                        <router-link v-if="data1.url" :to="data1.url">
+                            <ion-label>{{ data1.name }}</ion-label>
+                        </router-link>
+                    </ion-item>
+                </template>
+            </ion-accordion>
+        </ion-accordion-group>
+    </div>
+</template>
+
+<script>
+import { IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
+import { RouterLink } from 'vue-router';
+
+export default {
+    name: 'StaffSideNavigationBar',
+    components: {
+        IonAccordion,
+        IonAccordionGroup,
+        IonItem,
+        IonLabel,
+        RouterLink,
+    },
+
+    data() {
+
+        const dashboard = [
+            { name: 'Announcements', url: '/staff/Announcements' },
+        ];
+        const qms = [
+            { name: 'Procedures', url: '/staff/procedures' },
+            { name: 'Forms', url: '/staff/general-forms' },
+            { name: 'Mission and Vission', url: '/staff/departmental-forms' }
+        ]
+        const procedure = [
+            { name: 'Procedures', url: '/staff/procedure' },
+            /* { name: 'Department Procedures', url: '/staff/department-procedure' }, */
+        ];
+
+        /*   const policy = [
+              { name: 'General Policy', url: '/staff/General-Policy' },
+              { name: 'Department Policy', url: '/staff/Department-Policy' },
+          ]; */
+
+        const form = [
+            { name: 'General Forms', url: '/staff/General-Form' },
+            { name: 'Department Forms', url: '/staff/Department-Form' }
+        ];
+
+        /*  const procedure = [
+             { name: 'Procedures Documents', url: '/staff/Procedure' },
+         ]; */
+
+        const setting = [
+            { name: 'Profile', url: '/staff/Profile' },
+        ];
+
+        const items = [
+            { name: 'Dashboard', child: dashboard },
+            { name: 'E-QMS', child: qms },
+            { name: 'Settings', child: setting },
+        ];
+
+        return {
+            items
+        };
+    }
+};
+</script>
