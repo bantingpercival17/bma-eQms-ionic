@@ -1,25 +1,17 @@
-const addRoute = (prop, name, path, metaName, component) => ({
-  path,
-  name: prop + name,
-  meta: {
-    auth: true,
-    name: metaName,
-    user: 'admin'
-  },
-  component: () => import(component)
-});
-
-const path = '../views/Administrative/'
+import {
+  RouteModel
+} from './RouteModel'
+const routeModel = new RouteModel()
+const userType = 'admin'
 export const adminRoute = (prop) => [
-  addRoute(prop, '.dashboard', '/', 'Dashboard', '../views/Students/Dashboard/AdminDashboard.vue'),
-  addRoute(prop, '.dashboard', '/admin/dashboard', 'Dashboard', '../views/Students/Dashboard/AdminDashboard.vue'),
-  addRoute(prop, '.user-management', '/administrative/user-management', 'User Management', '../views/Administrative/User/UserView.vue'),
+  routeModel.appendRoute(prop, '.dashboard', '/', 'Dashboard', () => import('@/views/Students/Dashboard/AdminDashboard.vue'), userType),
+  routeModel.appendRoute(prop, '.dashboard', '/admin/dashboard', 'Dashboard', () => import('@/views/Students/Dashboard/AdminDashboard.vue'), userType),
+  routeModel.appendRoute(prop, '.user-management', '/administrative/user-management', 'User Management', () => import('@/views/Administrative/User/UserView.vue'), userType),
   /* Procedure */
-  addRoute(prop, '.procedure', '/admin/procedures', 'Procedures', path + 'Procedure/ProcedureView.vue'),
-  addRoute(prop, '.procedure-view', '/admin/procedure/view/:view', 'Procedure', path + 'Procedure/ProcedureFile.vue'),
-
+  routeModel.appendRoute(prop, '.procedure', '/admin/procedures', 'Procedures', () => import(`@/views/Administrative/Procedure/ProcedureView.vue`), userType),
+  routeModel.appendRoute(prop, '.procedure-view', '/admin/procedure/view/:view', 'Procedure', () => import(`@/views/Administrative/Procedure/ProcedureFile.vue`), userType),
   /* Forms */
-  addRoute(prop, '.form-view', '/admin/forms/', 'Forms', path + 'Forms/FormsView.vue'),
+  routeModel.appendRoute(prop, '.form-view', '/admin/forms/', 'Forms', () => import('@/views/Administrative/Forms/FormsView.vue'), userType),
   {
     path: '/admin/Add-Policy-Documents',
     name: prop + '.add-policy-documents',

@@ -20,8 +20,11 @@
             </ion-card>
 
         </div>
-        <canvas ref="pdfCanvas" v-else>
-        </canvas>
+        <div v-else>
+            <pdf :src="pdfUrl"></pdf>
+        </div>
+        <!--  <canvas ref="pdfCanvas" v-else>
+        </canvas> -->
     </div>
 </template>
 <style scoped>
@@ -39,10 +42,9 @@ canvas {
 }
 </style>
 <script>
-import * as pdfjsLib from 'pdfjs-dist';
-/* import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
- */
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@latest/build/pdf.worker.min.js';
+/* import * as pdfjsLib from 'pdfjs-dist';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@latest/build/pdf.worker.min.js'; */
+import pdf from 'vue-pdf'
 import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/vue';
 export default {
     props: {
@@ -55,7 +57,7 @@ export default {
             default: '',
         },
     },
-    components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle },
+    components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, pdf },
     data() {
         return {
             pdfDoc: null,
@@ -66,25 +68,66 @@ export default {
         };
     },
     methods: {
-        async loadPdf(url, password) {
+        /*  async loadPdf(url, password) {
+             try {
+                 const loadingTask = pdfjsLib.getDocument({
+                     url: url,
+                     password: password,
+                 });
+
+                 loadingTask.onPassword = (updatePassword, reason) => {
+                     if (reason === pdfjsLib.PasswordResponses.INCORRECT_PASSWORD) {
+                         this.error = "Incorrect password";
+                     }
+                 };
+
+                 this.pdfDoc = await loadingTask.promise;
+                 this.numPages = this.pdfDoc.numPages;
+                 this.renderPage(this.pageNum);
+             } catch (e) {
+                 this.error = "Failed to load PDF";
+                 this.errorMessage = e.message
+                 console.error(e);
+             }
+         },
+         async renderPage(num) {
+             const page = await this.pdfDoc.getPage(num);
+             const viewport = page.getViewport({ scale: 1.5 });
+             const canvas = this.$refs.pdfCanvas;
+             const context = canvas.getContext('2d');
+             canvas.height = viewport.height;
+             canvas.width = viewport.width;
+
+             const renderContext = {
+                 canvasContext: context,
+                 viewport: viewport,
+             };
+
+             await page.render(renderContext).promise;
+         },
+         nextPage() {
+             if (this.pageNum < this.numPages) {
+                 this.pageNum++;
+                 this.renderPage(this.pageNum);
+             }
+         },
+         prevPage() {
+             if (this.pageNum > 1) {
+                 this.pageNum--;
+                 this.renderPage(this.pageNum);
+             }
+         },
+     },
+     mounted() {
+         this.loadPdf(this.pdfUrl, this.pdfPassword);
+     }, */
+        /* async loadPdf(url) {
             try {
-                const loadingTask = pdfjsLib.getDocument({
-                    url: url,
-                    password: password,
-                });
-
-                loadingTask.onPassword = (updatePassword, reason) => {
-                    if (reason === pdfjsLib.PasswordResponses.INCORRECT_PASSWORD) {
-                        this.error = "Incorrect password";
-                    }
-                };
-
-                this.pdfDoc = await loadingTask.promise;
+                this.pdfDoc = await pdfjsLib.getDocument(url).promise;
                 this.numPages = this.pdfDoc.numPages;
                 this.renderPage(this.pageNum);
             } catch (e) {
                 this.error = "Failed to load PDF";
-                this.errorMessage = /* e.details + " " + */ e.message
                 console.error(e);
             }
         },
@@ -114,10 +157,40 @@ export default {
                 this.pageNum--;
                 this.renderPage(this.pageNum);
             }
+        }, */
+        setupPdfWorker() {
+            const pdfWorker = require('pdfjs-dist/es5/build/pdf.worker.entry').default;
+            GlobalWorkerOptions.workerSrc = pdfWorker;
+        },
+        async loadPdf() {
+            const pdfContainer = this.$refs.pdfContainer;
+            const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
+
+            try {
+                const pdf = await loadingTask.promise;
+                const page = await pdf.getPage(1);
+
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                pdfContainer.appendChild(canvas);
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport,
+                };
+                await page.render(renderContext).promise;
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+            }
         },
     },
     mounted() {
-        this.loadPdf(this.pdfUrl, this.pdfPassword);
+        // this.setupPdfWorker();
+        //this.loadPdf();
     },
 };
 </script>

@@ -1,16 +1,10 @@
-const addRoute = (prop, name, path, metaName, component) => ({
-  path,
-  name: prop + name,
-  meta: {
-    auth: true,
-    name: metaName,
-    user: 'staff'
-  },
-  component: () => import(component)
-})
+import {
+  RouteModel
+} from './RouteModel'
+const routeModel = new RouteModel()
 
-
-const path = '../views/Staff/'
+const path = '@/views/Staff/'
+const userType = 'staff'
 export const staffRoute = (prop) => [{
     path: '/',
     name: prop + '.dashboard',
@@ -103,8 +97,8 @@ export const staffRoute = (prop) => [{
     component: () => import('../views/StaffSide/Procedure/Procedures.vue')
   },
   /* Procedure */
-  addRoute(prop, '.procedures', '/staff/procedures', 'Procedures', path + 'Procedures/ProceduresView.vue'),
+  routeModel.appendRoute(prop, '.procedures', '/staff/procedures', 'Procedures', () => import('@/views/Staff/Procedures/ProceduresView.vue'), userType),
   /* Forms */
-  addRoute(prop, '.departmental-forms', '/staff/departmental-forms', 'DEPARTMENTAL FORMS', path + 'Forms/DepartmentalForms.vue'),
-  addRoute(prop, '.general-forms', '/staff/general-forms', 'GENERAL FORMS', path + 'Forms/GeneralForms.vue'),
+  routeModel.appendRoute(prop, '.departmental-forms', '/staff/departmental-forms', 'DEPARTMENTAL FORMS', () => import('@/views/Staff/Forms/DepartmentalForms.vue'), userType),
+  routeModel.appendRoute(prop, '.general-forms', '/staff/general-forms', 'GENERAL FORMS', () => import('@/views/Staff/Forms/GeneralForms.vue'), userType),
 ]

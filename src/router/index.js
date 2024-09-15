@@ -4,13 +4,16 @@ import {
 } from '@ionic/vue-router';
 import {
   staffRoute
-} from './staff-route.js'
+} from './RouteStaff.js'
 import {
   adminRoute
-} from './admin-route.js'
+} from './RouteAdmin.js'
 import {
   authRoute
-} from './authRoute.js'
+} from './RouteAuthentication.js'
+import {
+  RouteModel
+} from './RouteModel'
 import store from '../store/index'
 import {
   IS_USER_AUTHENTICATE_GETTER,
@@ -20,6 +23,7 @@ import {
 
 store.dispatch(`auth/${AUTO_LOGIN_ACTION}`)
 
+const routeModel = new RouteModel();
 const routes = [{
     path: '/',
     redirect: '/login',
@@ -50,21 +54,7 @@ const router = createRouter({
   routes
 })
 
-function adminUserMiddleware(to, from, next) {
-  if (to.meta.user !== 'admin') {
-    next('/admin/dashboard')
-  } else {
-    next()
-  }
-}
 
-function staffUserMiddleware(to, from, next) {
-  if (to.meta.user !== 'staff') {
-    next('/staff/dashboard')
-  } else {
-    next()
-  }
-}
 router.beforeEach((to, from, next) => {
   const isAuth = store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`]
   const isAuthType = store.getters[`auth/${GET_USER_TYPE}`]
@@ -72,9 +62,9 @@ router.beforeEach((to, from, next) => {
 
   if (isAuth) {
     if (isAuthType === 'admin') {
-      adminUserMiddleware(to, from, next)
+      routeModel.adminUserMiddleware(to, from, next)
     } else if (isAuthType === 'staff') {
-      staffUserMiddleware(to, from, next)
+      routeModel.staffUserMiddleware(to, from, next)
     }
   } else {
     if (to.meta.user !== 'guest') {
@@ -83,6 +73,7 @@ router.beforeEach((to, from, next) => {
       next()
     }
   }
-  console.log('BASE_URL:', process.env.BASE_URL);
+  /* console.log('BASE_URL:',
+    import.meta.env.BASE_URL); */
 })
 export default router

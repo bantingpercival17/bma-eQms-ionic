@@ -4,11 +4,9 @@ import {
 import App from './App.vue'
 import store from './store'
 import router from './router';
-
 import {
   IonicVue
 } from '@ionic/vue';
-import './registerServiceWorker'
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
 
@@ -24,13 +22,12 @@ import '@ionic/vue/css/text-alignment.css';
 import '@ionic/vue/css/text-transformation.css';
 import '@ionic/vue/css/flex-utils.css';
 import '@ionic/vue/css/display.css';
-import '@ionic/vue/css/ionic.bundle.css';
-import './registerServiceWorker'
+//import './registerServiceWorker'
 /* Theme variables */
 import './theme/variables.css';
 import axiosInstance from './axios';
+/* import DatabaseSetup from './database'; */
 
-import './registerServiceWorker.js'
 const app = createApp(App)
   .use(store)
   .use(IonicVue)
@@ -47,3 +44,8 @@ const initializeApp = async () => {
   app.mount('#app');
 };
 router.isReady().then(initializeApp);
+
+/* router.isReady().then(() => {
+  app.config.globalProperties.$axios = axiosInstance;
+  app.mount('#app');
+}); */

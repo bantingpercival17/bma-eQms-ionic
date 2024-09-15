@@ -14,7 +14,7 @@
                 <div class="col-md-5">
                     <div v-if="data.length > 0">
                         <ion-card v-for="(item, index) in data" :key="index">
-                            <ion-card-content @click="openPDF(item.document.file_link, item.document.password)">
+                            <ion-card-content @click="openPDF(item)">
                                 <small class="text-muted fw-bolder">{{ item.form_code }}</small>
                                 <br>
                                 <label for="" class="fw-bolder text-primary h6">{{ item.form_name }}</label>
@@ -32,8 +32,11 @@
                 <div class="col-md-7">
                     <ion-card>
                         <ion-card-content>
-                            <div class="pdf-viewer-container" v-if="link">
-                                <PDFViewerComponent :pdfUrl="link" :pdfPassword="password" />
+                            <div class="pdf-viewer-container">
+                                <label for="" class="fw-bolder text-primary h6">{{ form.form_name }}</label>
+                                <br>
+                                <small class="text-muted fw-bolder">{{ form.form_code }}</small>
+                                <PDFViewerComponent v-if="form.link" :pdfUrl="form.link" :pdfPassword="form.password" />
                                 <!--   <iframe id="pdfViewer" class="pdf-viewer" ref="pdfViewer"></iframe> -->
                             </div>
                         </ion-card-content>
@@ -62,14 +65,19 @@ export default {
         IonContent, loadingController, IonRefresher, IonRefresherContent, IonCard, IonCardContent, PDFViewerComponent
     },
     data() {
+        const form = {
+            form_name: 'FORM NAME',
+            form_code: 'FORM CODE',
+            link: null,
+            password: null,
+        }
         return {
             pageTitle: 'GENERAL FORMS',
             data: [],
             isLoading: true,
-            link: "",
-            password: "",
             errorDetails: null,
-            retriveContentLink: '/forms/retrive-general-forms'
+            retriveContentLink: '/forms/retrive-general-forms',
+            form
         }
     },
     computed: {
@@ -108,20 +116,17 @@ export default {
         encrypt(data) {
             return btoa(data)
         },
-        async openPDF(fileContent, password) {
-            navigator.clipboard.writeText(password).then(() => {
+        async openPDF(item) {
+            this.form.form_name = item.form_name
+            this.form.form_code = item.form_code
+            //this.form.link = item.document.file_link
+            this.form.link = 'http://127.0.0.1:8000/storage/PROCEDURE%202.pdf'
+            this.form.password = item.document.password
+            navigator.clipboard.writeText(this.form.password).then(() => {
             }).catch(err => {
                 console.error('Failed to copy text: ', err);
             });
-            /*
-              const pdfViewer = this.$refs.pdfViewer;
-               pdfViewer.src = fileContent;
-                 pdfViewer.password = password
-            */
-
-            this.link = fileContent;
-            this.password = password
-            console.log(fileContent, password)
+            console.log(this.form)
 
         },
     },
