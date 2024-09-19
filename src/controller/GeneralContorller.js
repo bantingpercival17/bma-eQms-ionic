@@ -7,6 +7,9 @@ export class GeneralController {
     constructor() {
         this.token = store.getters[`auth/${GET_USER_TOKEN}`]; // Assign the user token in the constructor
     }
+    retriveData(apiLink, data) {
+
+    }
     storeItem(apiLink, data) {
         return axios.post(apiLink, data, {
                 headers: {

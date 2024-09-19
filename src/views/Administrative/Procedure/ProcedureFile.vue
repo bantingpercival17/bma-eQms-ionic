@@ -120,7 +120,6 @@ export default {
             this.isLoading = true;
             this.errorDetails = null;
             this.details = [];
-
             try {
                 const response = await axios.get(`procedure/retrive-procedure/${this.$route.params.view}`, {
                     headers: { Authorization: `Bearer ${this.token}` }
@@ -162,7 +161,8 @@ export default {
             try {
                 const formData = { fileID: data.id };
                 const response = await this.generalController.removeItem('procedure/file/remove', formData);
-                await this.$showMessageBox("File Removed", response.data);
+                await this.$showMessageBox("File Removed", response.data.data);
+                window.location.reload()
             } catch (error) {
                 await this.$showMessageBox(error.code, error.message);
             } finally {

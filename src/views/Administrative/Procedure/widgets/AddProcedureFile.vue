@@ -9,18 +9,23 @@
                 <div class="col-12 mt-3">
                     <button class="btn btn-primary btn-sm rounded w-100 mb-5" type="submit">UPLOAD</button>
                 </div>
+                <ConfirmationAlert ref="confirmationAlert" @confirmed="onConfirmed" @cancelled="onCancelled"
+                    header="UPLOAD PROCEDURE FILE" message="Do you want to upload a new Procedure File?"
+                    confirmText="Yes" :data="selectedData" />
             </form>
         </ion-card-content>
     </ion-card>
 </template>
 <script>
 import axios from 'axios'
-import { IonLabel, loadingController, alertController, IonCard, IonCardContent } from '@ionic/vue'
-import FileAttachComponent from '@/components/FileAttachComponent.vue'
+import { IonLabel, IonCard, IonCardContent } from '@ionic/vue';
+import FileAttachComponent from '@/components/FileAttachComponent.vue';
+import ConfirmationAlert from '../../../../components/alert/ConfirmationAlert.vue';
+import { GeneralController } from '../../../../controller/GeneralContorller';
 export default {
     name: 'AddProcedureFile',
     components: {
-        IonLabel, FileAttachComponent, IonCard, IonCardContent
+        IonLabel, FileAttachComponent, IonCard, IonCardContent, ConfirmationAlert
     },
     props: {
         token: String, procedure: String
@@ -33,29 +38,25 @@ export default {
         return {
             formData,
             errors: [],
+            selectedData: null,
         };
+    },
+    created() {
+        this.generalController = new GeneralController();
     },
     methods: {
         async storeProcedure() {
             this.errors = []
-            const loading = await loadingController.create({
-                message: 'Loading...',
-                cssClass: 'custom-loading',
-            });
-            loading.present();
-            console.log(this.formData)
-            axios.post('procedure/store-procedure/file', this.formData, {
-                headers: {
-                    Authorization: 'Bearer ' + this.token,
-                    'Content-Type': 'multipart/form-data',
-                }
-            }).then(response => {
-                loading.dismiss();
+            this.selectedData = this.formData;
+            this.$refs.confirmationAlert.showAlert();
+        },
+        async onConfirmed(data) {
+            const loading = await this.$showLoading();
+            try {
+                const response = await this.generalController.storeItem('procedure/store-procedure/file', data);
+                await this.$showMessageBox("File Removed", response.data.data);
                 window.location.reload()
-            }).catch(error => {
-                console.log(error);
-                loading.dismiss();
-
+            } catch (error) {
                 if (error.code === 'ERR_NETWORK') {
                     this.networkError = error
                 } else {
@@ -63,23 +64,17 @@ export default {
                         if (error.response.status === 422) {
                             this.errors = error.response.data.errors
                         } else {
-                            this.messageBox(error.code, error.message)
+                            this.$showMessageBox(error.code, error.message)
                         }
                     }
                 }
-                console.log(this.errors)
-            })
-
+            } finally {
+                await loading.dismiss();
+            }
         },
-        async messageBox(title, message) {
-            const alert = await alertController.create({
-                header: title,
-                subHeader: message,
-                buttons: ['Okay'],
-            });
-
-            await alert.present();
-        },
+        onCancelled() {
+            console.log('Cancelled action');
+        }
     }
 }
 </script>
