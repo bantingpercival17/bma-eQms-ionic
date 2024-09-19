@@ -51,7 +51,7 @@ export default {
                 }
             }).then(response => {
                 loading.dismiss();
-
+                window.location.reload()
             }).catch(error => {
                 console.log(error);
                 loading.dismiss();

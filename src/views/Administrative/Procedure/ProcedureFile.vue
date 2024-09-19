@@ -35,8 +35,11 @@
                                                     </label>
                                                 </td>
                                                 <td>
-                                                    <span @click="openPDF(procedure.file_link)"
+                                                    <span @click="openPDF(procedure)"
                                                         class="btn btn-primary btn-sm me-3">VIEW PDF</span>
+
+                                                    <span class="btn btn-danger btn-sm me-3"
+                                                        @click="showConfirmation(procedure)">REMOVE</span>
                                                 </td>
                                             </tr>
                                         </template>
@@ -55,12 +58,18 @@
                     <ion-card>
                         <ion-card-content>
                             <div class="pdf-viewer-container">
-                                <iframe id="pdfViewer" class="pdf-viewer" ref="pdfViewer"></iframe>
+                                <PDFViewerComponent v-if="form.link" :pdfUrl="form.link" :pdfPassword="form.password" />
+                                <div class="content-framce" v-else>
+                                    <label for="" class="fw-bolder text-primary h3">SELECT FILES</label>
+                                </div>
                             </div>
                         </ion-card-content>
                     </ion-card>
+                    <ConfirmationAlert ref="confirmationAlert" @confirmed="onConfirmed" @cancelled="onCancelled"
+                        header="Remove File" :data="selectedProcedure" />
                 </div>
             </div>
+
         </div>
         <div v-else>
             <p class="badge bg-danger">{{ errorDetails }}</p>
@@ -74,68 +83,95 @@
 import axios from 'axios';
 import { mapGetters } from 'vuex';
 import { GET_USER_TOKEN } from '@/store/storeConstants.js';
-import { IonContent, loadingController, IonRefresher, IonRefresherContent, IonCard, IonCardContent } from '@ionic/vue';
+import { IonContent, loadingController, alertController, IonRefresher, IonRefresherContent, IonCard, IonCardContent } from '@ionic/vue';
 import AddProcedureFile from '../Procedure/widgets/AddProcedureFile.vue'
+import PDFViewerComponent from '../../../components/PDFViewerComponent.vue'
+import ConfirmationAlert from '../../../components/alert/ConfirmationAlert.vue';
+import { GeneralController } from '../../../controller/GeneralContorller';
 export default {
     name: 'ProcedureFile',
     components: {
-        IonContent, loadingController, IonRefresher, IonRefresherContent, IonCard, IonCardContent,
-        AddProcedureFile
+        IonContent, loadingController, alertController, IonRefresher, IonRefresherContent, IonCard, IonCardContent,
+        AddProcedureFile, PDFViewerComponent, ConfirmationAlert
     },
     data() {
         return {
             isLoading: true,
             details: [],
-            errorDetails: null
-        }
+            errorDetails: null,
+            form: {
+                link: null,
+                password: null
+            },
+            selectedProcedure: null,
+        };
     },
     computed: {
         ...mapGetters('auth', {
             token: GET_USER_TOKEN,
         })
     },
-    mounted() {
-        this.retriveProcedure(this.$route.params.view)
+    created() {
+        this.generalController = new GeneralController();
+        this.fetchProcedure();
     },
     methods: {
-        async retriveProcedure(data) {
-            this.isLoading = true
-            this.errorDetails = null
-            this.details = []
-            axios.get(`procedure/retrive-procedure/${data}`, {
-                headers: {
-                    Authorization: 'Bearer ' + this.token
-                }
-            })
-                .then(response => {
-                    console.log(response.data)
-                    this.details = response.data.procedure
-                    this.isLoading = false
-                })
-                .catch(error => {
-                    this.errorDetails = error
-                    console.error('Error fetching file content:', error);
-                    this.isLoading = false
+        async fetchProcedure() {
+            this.isLoading = true;
+            this.errorDetails = null;
+            this.details = [];
+
+            try {
+                const response = await axios.get(`procedure/retrive-procedure/${this.$route.params.view}`, {
+                    headers: { Authorization: `Bearer ${this.token}` }
                 });
+                this.details = response.data.procedure;
+            } catch (error) {
+                this.errorDetails = error;
+                console.error('Error fetching file content:', error);
+            } finally {
+                this.isLoading = false;
+            }
         },
         async handleScroll(event) {
             event.target.complete();
-            this.retriveProcedure(this.$route.params.view)
+            await this.fetchProcedure();
         },
         encrypt(data) {
-            return btoa(data)
+            return btoa(data);
         },
         openPDF(fileContent) {
-            const pdfViewer = this.$refs.pdfViewer;
-            //console.log(response)
-            pdfViewer.src = fileContent;
-        }, copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Password copied to clipboard');
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
+            this.form.link = fileContent.file_link;
+            this.form.password = fileContent.password;
+            // Implement PDF viewer functionality if needed
         },
+        async copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                alert('Password copied to clipboard');
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+        },
+        showConfirmation(data) {
+            this.selectedProcedure = data;
+            this.$refs.confirmationAlert.showAlert();
+        },
+        async onConfirmed(data) {
+            const loading = await this.$showLoading();
+            try {
+                const formData = { fileID: data.id };
+                const response = await this.generalController.removeItem('procedure/file/remove', formData);
+                await this.$showMessageBox("File Removed", response.data);
+            } catch (error) {
+                await this.$showMessageBox(error.code, error.message);
+            } finally {
+                await loading.dismiss();
+            }
+        },
+        onCancelled() {
+            console.log('Cancelled action');
+        }
     },
 }
 </script>
@@ -146,6 +182,12 @@ export default {
     flex-direction: column;
     height: 90vh;
 } */
+.content-frame {
+    flex: 1;
+    width: 100%;
+    height: 80vh;
+    border: none;
+}
 
 iframe {
     flex: 1;

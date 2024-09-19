@@ -27,10 +27,11 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 import axiosInstance from './axios';
 /* import DatabaseSetup from './database'; */
-
+import alertMethods from './components/alert/alertMethods';
 const app = createApp(App)
   .use(store)
   .use(IonicVue)
+  .use(alertMethods)
   .use(router);
 // Provide the Axios instance globally
 const initializeApp = async () => {

@@ -40,14 +40,17 @@
                                                     {{ form.is_common === 1 ? 'GENERAL FORM' : 'DEPARTMENTAL FORM' }}
                                                 </td>
                                                 <td>
-                                                    <label class="text-muted "
+                                                    <label class="text-muted " v-if="form.document"
                                                         @click="copyToClipboard(form.document.password)">
                                                         {{ form.document.password }}
                                                     </label>
                                                 </td>
                                                 <td>
-                                                    <span @click="openPDF(form.document.file_link)"
+                                                    <span v-if="form.document" @click="openPDF(form.document.file_link)"
                                                         class="btn btn-primary btn-sm me-3">VIEW PDF</span>
+
+                                                    <span v-else @click="openPDF(form.id)"
+                                                        class="btn btn-primary btn-sm me-3">UPLOAD FILE</span>
                                                 </td>
                                             </tr>
                                         </template>
