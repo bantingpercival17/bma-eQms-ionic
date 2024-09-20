@@ -20,13 +20,13 @@
                                             <tr v-for="(procedure, index) in procedures" :key="index">
                                                 <td class="fw-bolder">{{ procedure.procedure_name }}</td>
                                                 <td>
-                                                    <label class="text-muted "
+                                                    <label class="text-muted " v-if="procedure.file"
                                                         @click="copyToClipboard(procedure.file.password)">
                                                         {{ procedure.file.password }}
                                                     </label>
                                                 </td>
                                                 <td>
-                                                    <a :href="procedure.file.file_link"
+                                                    <a :href="procedure.file.file_link" v-if="procedure.file"
                                                         class="btn btn-primary btn-sm me-3" target="_blank">
                                                         OPEN PDF
                                                     </a>

@@ -140,7 +140,7 @@ export default {
             return btoa(data);
         },
         openPDF(fileContent) {
-            this.form.link = fileContent.file_link;
+            this.form.link = /* fileContent.file_link; */'http://127.0.0.1:8000/storage/PROCEDURE%202.pdf'
             this.form.password = fileContent.password;
             // Implement PDF viewer functionality if needed
         },

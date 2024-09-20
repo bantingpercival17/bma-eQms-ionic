@@ -2,13 +2,6 @@
     <div>
 
 
-        <p class="badge bg-info mt-2">Page {{ pageNum }} of {{ numPages }}</p>
-        <div class="float-end">
-            <button class="btn btn-secondary btn-sm me-3" @click="prevPage" :disabled="pageNum <= 1">Previous</button>
-            <button class="btn btn-primary btn-sm" @click="nextPage" :disabled="pageNum >= numPages">Next</button>
-        </div>
-
-        <br>
         <div v-if="error" class="mt-3">
             <ion-card color="danger">
                 <ion-card-header>
@@ -21,19 +14,16 @@
 
         </div>
         <div v-else>
-
+            <p class="badge bg-info mt-2">Page {{ pageNum }} of {{ numPages }}</p>
+            <div class="float-end">
+                <button class="btn btn-secondary btn-sm me-3" @click="prevPage"
+                    :disabled="pageNum <= 1">Previous</button>
+                <button class="btn btn-primary btn-sm" @click="nextPage" :disabled="pageNum >= numPages">Next</button>
+            </div>
         </div>
-        <!--  <canvas ref="pdfCanvas" v-else>
-        </canvas> -->
     </div>
 </template>
 <style scoped>
-/* .scorm-container {
-    display: flex;
-    flex-direction: column;
-    height: 90vh;
-} */
-
 canvas {
     flex: 1;
     width: 100%;
@@ -46,6 +36,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';  // Use the local worker file
 
 import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/vue';
+import axios from 'axios';
 export default {
     props: {
         pdfUrl: {
@@ -70,11 +61,36 @@ export default {
     methods: {
         async loadPdf(url) {
             try {
-                this.pdfDoc = await pdfjsLib.getDocument(url).promise;
-                this.numPages = this.pdfDoc.numPages;
-                this.renderPage(this.pageNum);
+                try {
+                    const loadingTask = pdfjsLib.getDocument({
+                        url: url,
+                       /*  password: this.pdfPassword // Add the password here */
+                    });
+
+                    // Handle incorrect password scenario
+                    loadingTask.onPassword = (updatePasswordCallback) => {
+                        // If a wrong password is entered or re-prompt is needed
+                        const userEnteredPassword = prompt("This document is password protected. Please enter the password:");
+                        updatePasswordCallback(userEnteredPassword);
+                    };
+
+                    this.pdfDoc = await loadingTask.promise;
+                    this.numPages = this.pdfDoc.numPages;
+                    this.renderPage(this.pageNum);
+                } catch (e) {
+                    if (e.name === 'PasswordException') {
+                        this.error = "Incorrect password or failed to open the PDF.";
+                    } else {
+                        this.error = "Failed to load PDF";
+                    }
+                    console.error(e);
+                }
             } catch (e) {
-                this.error = "Failed to load PDF";
+                if (e.name === 'PasswordException') {
+                    this.error = "Incorrect password or failed to open the PDF.";
+                } else {
+                    this.error = "Failed to load PDF";
+                }
                 console.error(e);
             }
         },
@@ -108,7 +124,7 @@ export default {
 
     },
     mounted() {
-        // this.setupPdfWorker();
+        // this.setupPdfWorker();;
         this.loadPdf(this.pdfUrl);
     },
 };
