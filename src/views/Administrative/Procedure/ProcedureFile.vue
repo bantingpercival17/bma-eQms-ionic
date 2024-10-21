@@ -19,14 +19,22 @@
                                 <table id="basic-table" class="table table-striped mb-0">
                                     <thead>
                                         <tr>
+                                            <th id="actions" scope="col">ACTIONS</th>
                                             <th id="documentType" scope="col">VERSION NUMBER</th>
                                             <th>FILE PASSWORD</th>
-                                            <th id="actions" scope="col">ACTIONS</th>
+
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <template v-if="details.files.length > 0">
                                             <tr v-for="(procedure, index) in details.files" :key="index">
+                                                <td>
+                                                    <span @click="openPDF(encrypt(procedure.id))"
+                                                        class="btn btn-primary btn-sm me-3">VIEW PDF</span>
+
+                                                    <span class="btn btn-danger btn-sm me-3"
+                                                        @click="showConfirmation(procedure)">REMOVE</span>
+                                                </td>
                                                 <td class="fw-bolder">{{ procedure.version }}</td>
                                                 <td>
                                                     <label class="text-muted "
@@ -34,13 +42,7 @@
                                                         {{ procedure.password }}
                                                     </label>
                                                 </td>
-                                                <td>
-                                                    <span @click="openPDF(procedure)"
-                                                        class="btn btn-primary btn-sm me-3">VIEW PDF</span>
 
-                                                    <span class="btn btn-danger btn-sm me-3"
-                                                        @click="showConfirmation(procedure)">REMOVE</span>
-                                                </td>
                                             </tr>
                                         </template>
                                         <template v-else>
@@ -58,7 +60,7 @@
                     <ion-card>
                         <ion-card-content>
                             <div class="pdf-viewer-container">
-                                <PDFViewerComponent v-if="form.link" :pdfUrl="form.link" :pdfPassword="form.password" />
+                                <PDFViewerComponent v-if="form.link" :pdfUrl="form.link" />
                                 <div class="content-framce" v-else>
                                     <label for="" class="fw-bolder text-primary h3">SELECT FILES</label>
                                 </div>
@@ -140,9 +142,7 @@ export default {
             return btoa(data);
         },
         openPDF(fileContent) {
-            this.form.link = /* fileContent.file_link; */'http://127.0.0.1:8000/storage/PROCEDURE%202.pdf'
-            this.form.password = fileContent.password;
-            // Implement PDF viewer functionality if needed
+            this.form.link = fileContent
         },
         async copyToClipboard(text) {
             try {
@@ -162,7 +162,8 @@ export default {
                 const formData = { fileID: data.id };
                 const response = await this.generalController.removeItem('procedure/file/remove', formData);
                 await this.$showMessageBox("File Removed", response.data.data);
-                window.location.reload()
+                this.fetchProcedure();
+                //window.location.reload()
             } catch (error) {
                 await this.$showMessageBox(error.code, error.message);
             } finally {
@@ -177,11 +178,6 @@ export default {
 </script>
 
 <style scoped>
-/* .scorm-container {
-    display: flex;
-    flex-direction: column;
-    height: 90vh;
-} */
 .content-frame {
     flex: 1;
     width: 100%;

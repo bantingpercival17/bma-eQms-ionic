@@ -11,7 +11,7 @@
                                     <thead>
                                         <tr>
                                             <th id="documentType" scope="col">PROCEDURE NAME</th>
-                                            <th>FILE PASSWORD</th>
+                                            <!--   <th>FILE PASSWORD</th> -->
                                             <th id="actions" scope="col">ACTIONS</th>
                                         </tr>
                                     </thead>
@@ -19,12 +19,12 @@
                                         <template v-if="procedures.length > 0">
                                             <tr v-for="(procedure, index) in procedures" :key="index">
                                                 <td class="fw-bolder">{{ procedure.procedure_name }}</td>
-                                                <td>
+                                                <!-- <td>
                                                     <label class="text-muted " v-if="procedure.file"
                                                         @click="copyToClipboard(procedure.file.password)">
                                                         {{ procedure.file.password }}
                                                     </label>
-                                                </td>
+                                                </td> -->
                                                 <td>
                                                     <a :href="procedure.file.file_link" v-if="procedure.file"
                                                         class="btn btn-primary btn-sm me-3" target="_blank">
@@ -34,6 +34,8 @@
                                                         :to="{ name: 'admin-layout.procedure-view', params: { view: encrypt(procedure.id) } }">
                                                         VIEW
                                                     </router-link>
+                                                    <span class="btn btn-danger btn-sm me-3"
+                                                        @click="showConfirmation(procedure)">REMOVE</span>
                                                 </td>
                                             </tr>
                                         </template>
@@ -44,16 +46,14 @@
                                         </template>
                                     </tbody>
                                 </table>
-
+                                <ConfirmationAlert ref="confirmationAlert" @confirmed="onConfirmed"
+                                    @cancelled="onCancelled" header="Remove Procedure" :data="selectedData" />
                             </div>
                         </ion-card-content>
                     </ion-card>
 
                 </div>
-                <div class="col-md-4"> <!-- Adjusted column width -->
-                    <!--    <div class="pdf-viewer-container">
-              <iframe id="pdfViewer" class="pdf-viewer" ref="pdfViewer"></iframe>
-            </div> -->
+                <div class="col-md-4">
                     <div class="add-form">
                         <CreateProcedure :departmentList="departments" />
                     </div>
@@ -68,15 +68,18 @@ import { mapGetters } from 'vuex';
 import { GET_USER_TOKEN } from '@/store/storeConstants.js';
 import { IonCard, IonCardContent, IonContent, IonButton } from '@ionic/vue';
 import CreateProcedure from './CreateProcedure.vue';
+import ConfirmationAlert from '../../../components/alert/ConfirmationAlert.vue';
+import { GeneralController } from '../../../controller/GeneralContorller';
 export default {
     name: 'AddProcedurePage',
     components: {
-        IonCard, IonCardContent, IonContent, IonButton, CreateProcedure
+        IonCard, IonCardContent, IonContent, IonButton, CreateProcedure, ConfirmationAlert
     },
     data() {
         return {
             procedures: [],
-            departments: []
+            departments: [],
+            selectedData: null,
         };
     },
     computed: {
@@ -125,6 +128,26 @@ export default {
         },
         encrypt(data) {
             return btoa(data)
+        },
+        showConfirmation(data) {
+            this.selectedProcedure = data;
+            this.$refs.confirmationAlert.showAlert();
+        },
+        async onConfirmed(data) {
+            const loading = await this.$showLoading();
+            try {
+                const formData = { fileID: data };
+               /*  const response = await this.generalController.removeItem('procedure/file/remove', formData);
+                await this.$showMessageBox("File Removed", response.data.data);
+                window.location.reload() */
+            } catch (error) {
+                await this.$showMessageBox(error.code, error.message);
+            } finally {
+                await loading.dismiss();
+            }
+        },
+        onCancelled() {
+            console.log('Cancelled action');
         }
     },
     async created() {

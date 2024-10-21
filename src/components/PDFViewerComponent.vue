@@ -1,17 +1,13 @@
 <template>
     <div>
-
-
         <div v-if="error" class="mt-3">
             <ion-card color="danger">
                 <ion-card-header>
                     <ion-card-title>PDF DISPLAY ERROR</ion-card-title>
                     <ion-card-subtitle>{{ error }}</ion-card-subtitle>
                 </ion-card-header>
-
-                <ion-card-content> {{ errorMessage }} </ion-card-content>
+                <ion-card-content>{{ errorMessage }}</ion-card-content>
             </ion-card>
-
         </div>
         <div v-else>
             <p class="badge bg-info mt-2">Page {{ pageNum }} of {{ numPages }}</p>
@@ -20,35 +16,41 @@
                     :disabled="pageNum <= 1">Previous</button>
                 <button class="btn btn-primary btn-sm" @click="nextPage" :disabled="pageNum >= numPages">Next</button>
             </div>
+            <!-- Add the canvas element for the PDF -->
+            <!--  <canvas class="canvas" ref="pdfCanvas"></canvas> -->
+            <pdf :src="pdfUrl">
+                <slot name="loading">
+                    loading content here...
+                </slot>
+            </pdf>
         </div>
     </div>
 </template>
+
 <style scoped>
-canvas {
+.canvas {
     flex: 1;
     width: 100%;
     height: 80vh;
     border: none;
 }
 </style>
+
 <script>
-import * as pdfjsLib from 'pdfjs-dist';
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';  // Use the local worker file
+import pdf from 'pdfvuer'
+import 'pdfjs-dist/build/pdf.worker.entry' // not needed since v1.9.1
 
 import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/vue';
 import axios from 'axios';
+
 export default {
     props: {
         pdfUrl: {
             type: String,
             required: true,
-        },
-        pdfPassword: {
-            type: String,
-            default: '',
-        },
+        }
     },
-    components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle },
+    components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, pdf },
     data() {
         return {
             pdfDoc: null,
@@ -59,73 +61,74 @@ export default {
         };
     },
     methods: {
-        async loadPdf(url) {
+        async getFile() {
+            this.error = null; // Reset the error before starting the request
+
             try {
-                try {
-                    const loadingTask = pdfjsLib.getDocument({
-                        url: url,
-                       /*  password: this.pdfPassword // Add the password here */
-                    });
+                const response = await axios.post('/open-pdf', { link: this.pdfUrl }/* , { responseType: 'blob' } */);
 
-                    // Handle incorrect password scenario
-                    loadingTask.onPassword = (updatePasswordCallback) => {
-                        // If a wrong password is entered or re-prompt is needed
-                        const userEnteredPassword = prompt("This document is password protected. Please enter the password:");
-                        updatePasswordCallback(userEnteredPassword);
-                    };
+                // Create a Blob from the response (PDF data)
+                /*  const file = new Blob([response.data], { type: 'application/pdf' }); */
+                this.pdfUrl = response.data.file
 
-                    this.pdfDoc = await loadingTask.promise;
-                    this.numPages = this.pdfDoc.numPages;
-                    this.renderPage(this.pageNum);
-                } catch (e) {
-                    if (e.name === 'PasswordException') {
-                        this.error = "Incorrect password or failed to open the PDF.";
-                    } else {
-                        this.error = "Failed to load PDF";
-                    }
-                    console.error(e);
-                }
-            } catch (e) {
-                if (e.name === 'PasswordException') {
-                    this.error = "Incorrect password or failed to open the PDF.";
-                } else {
-                    this.error = "Failed to load PDF";
-                }
-                console.error(e);
+                // Load the PDF using pdfjsLib
+                const loadingTask = pdfjsLib.getDocument(file);
+                const pdf = await loadingTask.promise;
+
+                this.pdfDoc = pdf; // Store the loaded PDF document
+                this.numPages = pdf.numPages; // Get total number of pages
+                console.log(this.numPages)
+
+                // Render the first page (starts at 1)
+                this.renderPage(1);
+            } catch (error) {
+                console.error(error);
+                this.error = 'Unable to load PDF. Check the password or PDF file.';
+                this.errorMessage = error.message;
             }
         },
-        async renderPage(num) {
-            const page = await this.pdfDoc.getPage(num);
-            const viewport = page.getViewport({ scale: 1.5 });
-            const canvas = this.$refs.pdfCanvas;
-            const context = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
 
-            const renderContext = {
-                canvasContext: context,
-                viewport: viewport,
-            };
+        // Method to render a PDF page
+        async renderPage(pageNumber) {
+            try {
+                const page = await this.pdfDoc.getPage(pageNumber); // Get the page
+                const canvas = document.getElementById('pdf-canvas');
+                const context = canvas.getContext('2d');
 
-            await page.render(renderContext).promise;
+                const viewport = page.getViewport({ scale: 1.5 }); // You can adjust the scale
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+
+                await page.render(renderContext).promise; // Render the page
+            } catch (error) {
+                console.error("Error rendering page:", error);
+                this.error = 'Unable to render PDF page.';
+            }
         },
+
+
         nextPage() {
             if (this.pageNum < this.numPages) {
                 this.pageNum++;
                 this.renderPage(this.pageNum);
             }
         },
+
         prevPage() {
             if (this.pageNum > 1) {
                 this.pageNum--;
                 this.renderPage(this.pageNum);
             }
         },
-
     },
+
     mounted() {
-        // this.setupPdfWorker();;
-        this.loadPdf(this.pdfUrl);
+        this.getFile();
     },
 };
 </script>
