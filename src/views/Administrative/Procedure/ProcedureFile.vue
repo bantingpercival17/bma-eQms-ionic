@@ -5,12 +5,23 @@
                 refreshing-text="Refreshing...">
             </ion-refresher-content>
         </ion-refresher>
-        <!--   <ion-content>
-
-        </ion-content> -->
         <div v-if="!errorDetails">
             <p class="display-6 fw-bolder text-primary">{{ details.procedure_name }}</p>
             <div class="row">
+                <div class="col-md-7">
+                    <ion-card>
+                        <ion-card-content>
+                            <div class="pdf-viewer-container">
+                                <PDFViewerComponent v-if="form.link" :pdfUrl="form.link" />
+                                <div class="content-framce" v-else>
+                                    <label for="" class="fw-bolder text-primary h3">SELECT FILES</label>
+                                </div>
+                            </div>
+                        </ion-card-content>
+                    </ion-card>
+                    <ConfirmationAlert ref="confirmationAlert" @confirmed="onConfirmed" @cancelled="onCancelled"
+                        header="Remove File" :data="selectedProcedure" />
+                </div>
                 <div class="col-md-5">
                     <AddProcedureFile :token="token" :procedure="encrypt(details.id)" />
                     <ion-card class="mt-3">
@@ -56,20 +67,7 @@
                         </ion-card-content>
                     </ion-card>
                 </div>
-                <div class="col-md-7">
-                    <ion-card>
-                        <ion-card-content>
-                            <div class="pdf-viewer-container">
-                                <PDFViewerComponent v-if="form.link" :pdfUrl="form.link" />
-                                <div class="content-framce" v-else>
-                                    <label for="" class="fw-bolder text-primary h3">SELECT FILES</label>
-                                </div>
-                            </div>
-                        </ion-card-content>
-                    </ion-card>
-                    <ConfirmationAlert ref="confirmationAlert" @confirmed="onConfirmed" @cancelled="onCancelled"
-                        header="Remove File" :data="selectedProcedure" />
-                </div>
+
             </div>
 
         </div>
@@ -127,6 +125,7 @@ export default {
                     headers: { Authorization: `Bearer ${this.token}` }
                 });
                 this.details = response.data.procedure;
+                this.openPDF(this.encrypt(this.details.files[0].id))
             } catch (error) {
                 this.errorDetails = error;
                 console.error('Error fetching file content:', error);
@@ -142,12 +141,13 @@ export default {
             return btoa(data);
         },
         openPDF(fileContent) {
-            this.form.link = null
-            /*  setInterval(() => {
-                 this.form.link = null
-             }, 100); */
-            this.form.link = fileContent
+            // Set the link to null to clear the previous PDF
+            this.form.link = null;
 
+            // Set the new PDF file link after 5 seconds (5000 milliseconds)
+            setTimeout(() => {
+                this.form.link = fileContent;
+            }, 5000);
         },
         async copyToClipboard(text) {
             try {
