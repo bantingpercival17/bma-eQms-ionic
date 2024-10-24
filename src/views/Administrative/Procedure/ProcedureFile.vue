@@ -142,7 +142,12 @@ export default {
             return btoa(data);
         },
         openPDF(fileContent) {
+            this.form.link = null
+            /*  setInterval(() => {
+                 this.form.link = null
+             }, 100); */
             this.form.link = fileContent
+
         },
         async copyToClipboard(text) {
             try {
