@@ -7,8 +7,34 @@ export class GeneralController {
     constructor() {
         this.token = store.getters[`auth/${GET_USER_TOKEN}`]; // Assign the user token in the constructor
     }
-    retriveData(apiLink, data) {
+    async retriveData(apiLink, columnName) {
+        return axios.get(apiLink, {
+                headers: {
+                    Authorization: 'Bearer ' + this.token
+                }
+            })
+            .then(response => {
+                // Return response for chaining
+                return response.data[columnName];
+            })
+            .catch(error => {
+                return []
+                throw error; // Rethrow to allow `.catch` in the component
 
+            });
+        let returnData = []
+        try {
+            const response = await axios.get(apiLink, {
+                headers: {
+                    Authorization: 'Bearer ' + this.token
+                }
+            });
+            returnData = response.data[columnName];
+        } catch (error) {
+            console.error('Error fetching for ' + columnName + ':', error);
+            returnData = [];
+        }
+        return returnData
     }
     storeItem(apiLink, data) {
         return axios.post(apiLink, data, {

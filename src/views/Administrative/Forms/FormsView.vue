@@ -1,125 +1,114 @@
 <template>
-    <div v-if="!isLoading">
-        <ion-refresher slot="fixed" @ionRefresh="handleScroll($event)">
-            <ion-refresher-content pulling-text="Pull to refresh" refreshing-spinner="circles"
-                refreshing-text="Refreshing...">
-            </ion-refresher-content>
-        </ion-refresher>
-        <!--   <ion-content>
+    <ion-refresher slot="fixed" @ionRefresh="handleScroll($event)">
+        <ion-refresher-content pulling-text="Pull to refresh" refreshing-spinner="circles"
+            refreshing-text="Refreshing...">
+        </ion-refresher-content>
+    </ion-refresher>
+    <!-- TITLE HEADER -->
+    <p class="display-6 fw-bolder text-primary">FORMS</p>
+    <!-- CONTENT -->
+    <div class="row">
+        <div class="col-md-7">
 
-        </ion-content> -->
-        <div v-if="!errorDetails">
-            <p class="display-6 fw-bolder text-primary">FORMS</p>
-            <div class="row">
-                <div class="col-md-7">
-                    <!--   <AddProcedureFile :token="token" :procedure="encrypt(details.id)" /> -->
-                    <ion-card class="mt-3">
-                        <ion-card-content>
-                            <div class="table-responsive">
-                                <table id="basic-table" class="table table-striped mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th id="documentType" scope="col">FORM DETAILS</th>
-                                            <th id="documentType" scope="col">FORM STATUS</th>
-                                            <th>FILE PASSWORD</th>
-                                            <th id="actions" scope="col">ACTIONS</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <template v-if="data.length > 0">
-                                            <tr v-for="(form, index) in data" :key="index">
-                                                <td>
-                                                    <span class="text-primary fw-bolder">{{ form.form_name }}</span>
-                                                    <br>
-                                                    <span class="fw-bolder text-muted">
-                                                        {{ form.form_code }}
-                                                    </span>
+            <div class="search-filter-bar">
+                <ion-searchbar v-model="searchTerm" @ionInput="retriveForms"></ion-searchbar>
+            </div>
+            <div v-if="!isLoading">
+                <div v-if="!errorDetails">
+                    <div class="mt-3">
+                        <div v-if="data.length > 0" class="content">
+                            <ion-card v-for="form in data" :key="form.id">
+                                <ion-card-header>
+                                    <span class="text-primary fw-bolder h4">{{ form.form_name }}</span>
+                                    <span class="text-muted fw-bolder h6">{{ form.form_code }}</span>
+                                </ion-card-header>
+                                <ion-footer>
+                                    <div class="float-end m-2">
+                                        <span class="btn btn-outline-danger btn-sm me-3"
+                                            @click="removeForm(form)">REMOVE</span>
+                                        <router-link class="btn btn-primary btn-sm me-3"
+                                            :to="{ name: 'admin-layout.form-view-files', params: { view: encrypt(form.id) } }">
+                                            SEE FORM
+                                        </router-link>
+                                    </div>
 
-                                                </td>
-                                                <td>
-                                                    {{ form.is_common === 1 ? 'GENERAL FORM' : 'DEPARTMENTAL FORM' }}
-                                                </td>
-                                                <td>
-                                                    <label class="text-muted " v-if="form.document"
-                                                        @click="copyToClipboard(form.document.password)">
-                                                        {{ form.document.password }}
-                                                    </label>
-                                                </td>
-                                                <td>
-                                                    <span v-if="form.document" @click="openPDF(form.document.file_link)"
-                                                        class="btn btn-primary btn-sm me-3">VIEW PDF</span>
-
-                                                    <span v-else @click="openPDF(form.id)"
-                                                        class="btn btn-primary btn-sm me-3">UPLOAD FILE</span>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                        <template v-else>
-                                            <tr>
-                                                <td colspan="4">No Data</td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
+                                </ion-footer>
+                            </ion-card>
+                            <div class="mt-3 mb-3">
+                                <PaginationComponent :currentPage="pagination.current" :totalPages="pagination.total"
+                                    @change="data" />
                             </div>
-                        </ion-card-content>
-                    </ion-card>
+                        </div>
+                        <div v-else>
+                            <ion-card>
+                                <ion-card-header>
+                                    <span v-if="searchTerm.length > 0" class="text-primary fw-bolder h4">NOT
+                                        FOUND</span>
+                                    <span v-else class="text-primary fw-bolder h4">NO DATA</span>
+                                </ion-card-header>
+                            </ion-card>
+                        </div>
+                    </div>
+
                 </div>
-                <div class="col-md-5">
-                    <CreateForm :token="token" :departmentList="departments" :procedureList="procedures" />
+                <div v-else>
+                    <p class="badge bg-danger">{{ errorDetails }}</p>
                 </div>
             </div>
+
+
+
+
         </div>
-        <div v-else>
-            <p class="badge bg-danger">{{ errorDetails }}</p>
+        <div class="col-md-5">
+            <!-- CREATE FORMS -->
+            <CreateForm :departmentList="departments" :procedureList="procedures" />
         </div>
     </div>
-    <div v-else>
-        <p class="badge bg-info">LOADING CONTENTS</p>
-    </div>
+    <!-- COMPONENTS -->
+    <ConfirmationAlert ref="confirmationAlert" @confirmed="onConfirmed" @cancelled="onCancelled" header="Remove Form"
+        :data="selectedData" />
+    <ContentLoaderView :isOpen="isLoading" />
 
 </template>
 <script>
-import axios from 'axios';
-import { mapGetters } from 'vuex';
-import { GET_USER_TOKEN } from '@/store/storeConstants.js';
-import { IonContent, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, } from '@ionic/vue';
+import { IonContent, IonFooter, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, IonSearchbar, IonInput, IonCardHeader } from '@ionic/vue';
 import CreateForm from '../Forms/widgets/CreateForms.vue'
+import ConfirmationAlert from '../../../components/alert/ConfirmationAlert.vue';
+import { GeneralController } from '../../../controller/GeneralContorller';
+import PaginationComponent from '../../../components/widgets/PaginationComponent.vue';
+import ContentLoaderView from '../../../components/widgets/ContentLoaderView.vue';
 export default {
-    name: 'AddProcedurePage',
+    name: 'FormsView',
     components: {
-        IonContent, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, CreateForm
+        IonContent, IonButton, IonSearchbar, IonInput, IonRefresher, IonRefresherContent,
+        IonCard, IonCardContent, IonCardHeader, IonFooter,
+        CreateForm, PaginationComponent, ConfirmationAlert, ContentLoaderView
     },
     data() {
         return {
+            selectedData: [],
             isLoading: true,
             data: [],
             errorDetails: null,
             procedures: [],
-            departments: []
+            departments: [],
+            searchTerm: '',
+            pagination: {
+                current: 1,
+                total: 1
+            }
         };
     },
-    computed: {
-        ...mapGetters('auth', {
-            token: GET_USER_TOKEN
-        })
+    mounted() {
+        this.retriveForms()
+    },
+    async created() {
+        this.generalController = new GeneralController();
+        this.departments = await this.generalController.retriveData('role-list', 'roles')
+        this.procedures = await this.generalController.retriveData('/procedure/retrive-procedure', 'procedures')
     },
     methods: {
-        async fetchDataList(apiLink, columnName) {
-            let returnData = []
-            try {
-                const response = await axios.get(apiLink, {
-                    headers: {
-                        Authorization: 'Bearer ' + this.token
-                    }
-                });
-                returnData = response.data[columnName];
-            } catch (error) {
-                console.error('Error fetching for ' + columnName + ':', error);
-                returnData = [];
-            }
-            return returnData
-        },
         copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
                 alert('Password copied to clipboard');
@@ -132,38 +121,45 @@ export default {
         },
         async handleScroll(event) {
             event.target.complete();
+            this.isLoading = true
+            this.refershFunction()
+        },
+        async retriveForms() {
+
+            this.errorDetails = null
+            this.details = []
+            const response = await this.generalController.retriveData('forms/retrive-forms?search=' + this.searchTerm, 'forms')
+            this.data = response.data
+            //console.log(this.data.data)
+            this.isLoading = false
+
+        },
+        async refershFunction() {
             this.retriveForms()
             this.departments = await this.fetchDataList('role-list', 'roles')
             this.procedures = await this.fetchDataList('/procedure/retrive-procedure', 'procedures')
         },
-        async retriveForms() {
-            this.isLoading = true
-            this.errorDetails = null
-            this.details = []
-            axios.get(`forms/retrive-forms`, {
-                headers: {
-                    Authorization: 'Bearer ' + this.token
-                }
-            })
-                .then(response => {
-                    console.log(response.data)
-                    this.data = response.data.forms
-                    this.isLoading = false
-                })
-                .catch(error => {
-                    this.errorDetails = error
-                    console.error('Error fetching file content:', error);
-                    this.isLoading = false
-                });
+        removeForm(form) {
+            this.selectedData = form;
+            this.$refs.confirmationAlert.showAlert();
         },
+        async onConfirmed(data) {
+            const loading = await this.$showLoading();
+            try {
+                const formData = { form_id: this.encrypt(data.id) };
+                const response = await this.generalController.removeItem('forms/remove', formData);
+                await this.$showMessageBox("Form Removed", response.data.data);
+                this.refershFunction();
+                //window.location.reload()
+            } catch (error) {
+                await this.$showMessageBox(error.code, error.message);
+            } finally {
+                await loading.dismiss();
+            }
+        },
+        onCancelled() {
+            console.log('Cancelled action');
+        }
     },
-    mounted() {
-        this.retriveForms()
-    },
-    async created() {
-        this.departments = await this.fetchDataList('role-list', 'roles')
-        this.procedures = await this.fetchDataList('/procedure/retrive-procedure', 'procedures')
-    }
-
 }
 </script>

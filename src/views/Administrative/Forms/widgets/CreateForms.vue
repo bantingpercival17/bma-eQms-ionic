@@ -33,27 +33,30 @@
                                 <option value="0">DEPARTMENTAL PROCEDURE</option>
                             </select>
                             <span class="badge bg-danger mt-2" v-if="errors['status']">{{
-                    errors['status'][0] }}</span>
+                                errors['status'][0] }}</span>
                         </div>
                     </div>
                     <div class="col-12 mt-3">
                         <button class="btn btn-primary btn-sm rounded w-100 mb-5" type="submit">SAVE </button>
                     </div>
+                    <ConfirmationAlert ref="confirmationAlert" @confirmed="onConfirmed" @cancelled="onCancelled"
+                        header="ADD FORMS" message="Do you want to add Form?" confirmText="Yes" :data="selectedData" />
                 </form>
             </div>
         </ion-card-content>
     </ion-card>
 </template>
 <script>
-import axios from 'axios'
-import { IonLabel, loadingController, IonCard, IonCardContent, alertController } from '@ionic/vue'
+import { IonLabel, IonCard, IonCardContent } from '@ionic/vue'
 import InputComponent from '@/components/InputComponents.vue'
 import SelectComponent from '@/components/SelectComponents.vue'
 import FileAttachComponent from '@/components/FileAttachComponent.vue'
+import { GeneralController } from '../../../../controller/GeneralContorller';
+import ConfirmationAlert from '../../../../components/alert/ConfirmationAlert.vue';
 export default {
     name: 'CreateForm',
     components: {
-        IonLabel, IonCard, IonCardContent, InputComponent, SelectComponent, FileAttachComponent
+        IonLabel, IonCard, IonCardContent, InputComponent, SelectComponent, FileAttachComponent, ConfirmationAlert
     },
     props: {
         departmentList: Object, procedureList: Object, token: String
@@ -66,36 +69,32 @@ export default {
             procedure: '',
             status: '',
             file: [],
+
         }
         return {
             formData,
             errors: [],
             procedures: [],
-            departments: []
+            departments: [],
+            selectedData: []
         };
+    },
+    created() {
+        this.generalController = new GeneralController();
     },
     methods: {
         async storeProcedure() {
             this.errors = []
-            const loading = await loadingController.create({
-                message: 'Loading...',
-                cssClass: 'custom-loading',
-            });
-            loading.present();
-            console.log(this.formData)
-            axios.post('forms/store-forms', this.formData, {
-                headers: {
-                    Authorization: 'Bearer ' + this.token,
-                    'Content-Type': 'multipart/form-data',
-                }
-            }).then(response => {
-                loading.dismiss();
-                location.reload()
-
-            }).catch(error => {
-                console.log(error);
-                loading.dismiss();
-
+            this.selectedData = this.formData;
+            this.$refs.confirmationAlert.showAlert();
+        },
+        async onConfirmed(data) {
+            const loading = await this.$showLoading();
+            try {
+                const response = await this.generalController.storeItem('forms/store-forms', data);
+                await this.$showMessageBox("FORM ADDED", response.data.data);
+                window.location.reload()
+            } catch (error) {
                 if (error.code === 'ERR_NETWORK') {
                     this.networkError = error
                 } else {
@@ -103,25 +102,17 @@ export default {
                         if (error.response.status === 422) {
                             this.errors = error.response.data.errors
                         } else {
-                            this.messageBox(error.code, error.message)
+                            this.$showMessageBox(error.code, error.message)
                         }
                     }
                 }
-                console.log(this.errors)
-            })
-
-
-
+            } finally {
+                await loading.dismiss();
+            }
         },
-        async messageBox(title, message) {
-            const alert = await alertController.create({
-                header: title,
-                subHeader: message,
-                buttons: ['Okay'],
-            });
-
-            await alert.present();
-        },
+        onCancelled() {
+            console.log('Cancelled action');
+        }
     }
 }
 </script>

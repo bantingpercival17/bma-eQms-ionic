@@ -85,7 +85,7 @@ export default {
             const loading = await this.$showLoading();
             try {
                 const response = await this.generalController.storeItem('procedure/store-procedure', data);
-                await this.$showMessageBox("File Removed", response.data.data);
+                await this.$showMessageBox("PROCEDURE ADDED", response.data.data);
                 window.location.reload()
             } catch (error) {
                 if (error.code === 'ERR_NETWORK') {
