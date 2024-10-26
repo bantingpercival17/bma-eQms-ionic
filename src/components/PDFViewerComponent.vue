@@ -47,6 +47,10 @@ export default {
         pdfUrl: {
             type: String,
             required: true,
+        },
+        link: {
+            type: String,
+            required: true
         }
     },
     components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle },
@@ -63,7 +67,7 @@ export default {
         async loadFile() {
             this.error = null;
             try {
-                const response = await axios.post('/open-pdf', { link: this.pdfUrl }, {
+                const response = await axios.post(this.link, { link: this.pdfUrl }, {
                     responseType: 'blob' // Important to handle the file as binary
                 });
                 const blob = new Blob([response.data], { type: 'application/pdf' });

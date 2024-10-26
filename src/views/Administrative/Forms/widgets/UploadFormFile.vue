@@ -54,7 +54,7 @@ export default {
             try {
                 const response = await this.generalController.storeItem('forms/store-forms/file', data);
                 await this.$showMessageBox("UPLOAD FILE", response.data.data);
-                //window.location.reload()
+                window.location.reload()
             } catch (error) {
                 if (error.code === 'ERR_NETWORK') {
                     this.networkError = error
