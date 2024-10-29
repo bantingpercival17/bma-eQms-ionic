@@ -11,6 +11,14 @@
         </div>
         <div v-else>
             <div class="full-screen-container-a">
+                <div class="button-tool float-end mb-3">
+                    <ion-button size="default" shape="round" @click="printPdf">
+                        <ion-icon slot="icon-only" size="small" :icon="print"></ion-icon>
+                    </ion-button>
+                    <ion-button size="default" shape="round" @click="donwloadFile">
+                        <ion-icon slot="icon-only" size="small" :icon="downloadSharp"></ion-icon>
+                    </ion-button>
+                </div>
                 <iframe v-if="pdfDoc" :src="`${pdfDoc}#toolbar=0&navpanes=0`" class=" full-screen-iframe"
                     frameborder="0" @contextmenu.prevent></iframe>
             </div>
@@ -38,10 +46,9 @@
 
 <script>
 
-
-import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/vue';
+import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton } from '@ionic/vue';
 import axios from 'axios';
-
+import { print, download, downloadSharp } from 'ionicons/icons';
 export default {
     props: {
         pdfUrl: {
@@ -53,7 +60,7 @@ export default {
             required: true
         }
     },
-    components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle },
+    components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton },
     data() {
         return {
             pdfDoc: null,
@@ -61,6 +68,7 @@ export default {
             numPages: 0,
             error: null,
             errorMessage: null,
+            print, download, downloadSharp
         };
     },
     methods: {
@@ -79,8 +87,18 @@ export default {
                 this.error = 'Unable to load PDF. Check the password or PDF file.';
                 this.errorMessage = error.message;
             }
-        }
-
+        },
+        printPdf() {
+            if (this.pdfDoc) {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = this.pdfDoc;
+                document.body.appendChild(iframe);
+                iframe.contentWindow.print();
+            } else {
+                console.error('No PDF document available for printing.');
+            }
+        },
     },
     mounted() {
         this.loadFile()
