@@ -9,10 +9,10 @@ export class GeneralController {
     }
     async retriveData(apiLink, columnName) {
         return axios.get(apiLink, {
-                headers: {
-                    Authorization: 'Bearer ' + this.token
-                }
-            })
+            headers: {
+                Authorization: 'Bearer ' + this.token
+            }
+        })
             .then(response => {
                 // Return response for chaining
                 return response.data[columnName];
@@ -36,13 +36,29 @@ export class GeneralController {
         }
         return returnData
     }
+    async retriveFile(apiLink, column) {
+        return await axios.post(apiLink, column, {
+            headers: {
+                Authorization: 'Bearer ' + this.token,
+            },
+            responseType: 'blob' // Important to handle the file as binary
+        }).then(response => {
+            // Return response for chaining
+            return response;
+        })
+            .catch(error => {
+                return []
+                throw error; // Rethrow to allow `.catch` in the component
+
+            });
+    }
     storeItem(apiLink, data) {
         return axios.post(apiLink, data, {
-                headers: {
-                    Authorization: 'Bearer ' + this.token,
-                    'Content-Type': 'multipart/form-data',
-                }
-            })
+            headers: {
+                Authorization: 'Bearer ' + this.token,
+                'Content-Type': 'multipart/form-data',
+            }
+        })
             .then(response => {
                 // Return response for chaining
                 return response;
@@ -53,11 +69,11 @@ export class GeneralController {
     }
     removeItem(apiLink, data) {
         return axios.post(apiLink, data, {
-                headers: {
-                    Authorization: 'Bearer ' + this.token,
-                    'Content-Type': 'multipart/form-data',
-                }
-            })
+            headers: {
+                Authorization: 'Bearer ' + this.token,
+                'Content-Type': 'multipart/form-data',
+            }
+        })
             .then(response => {
                 // Return response for chaining
                 return response;

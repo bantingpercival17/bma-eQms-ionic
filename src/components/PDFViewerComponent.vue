@@ -48,6 +48,7 @@
 
 import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton } from '@ionic/vue';
 import axios from 'axios';
+import { GeneralController } from '../controller/GeneralContorller';
 import { print, download, downloadSharp } from 'ionicons/icons';
 export default {
     props: {
@@ -75,9 +76,11 @@ export default {
         async loadFile() {
             this.error = null;
             try {
-                const response = await axios.post(this.link, { link: this.pdfUrl }, {
-                    responseType: 'blob' // Important to handle the file as binary
-                });
+                const response = await this.generalController.retriveFile(this.link, { link: this.pdfUrl });
+                console.log(response)
+                /*   const response = await axios.post(this.link, { link: this.pdfUrl }, {
+                      responseType: 'blob' // Important to handle the file as binary
+                  }); */
                 const blob = new Blob([response.data], { type: 'application/pdf' });
                 const url = window.URL.createObjectURL(blob);
                 this.pdfDoc = url; // Store the URL without fragments
@@ -101,7 +104,9 @@ export default {
         },
     },
     mounted() {
+        this.generalController = new GeneralController();
         this.loadFile()
+
         //window.addEventListener("keydown", this.disableBackNavigation);
     },
 };
