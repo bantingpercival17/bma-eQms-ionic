@@ -22,19 +22,6 @@ export class GeneralController {
                 throw error; // Rethrow to allow `.catch` in the component
 
             });
-        let returnData = []
-        try {
-            const response = await axios.get(apiLink, {
-                headers: {
-                    Authorization: 'Bearer ' + this.token
-                }
-            });
-            returnData = response.data[columnName];
-        } catch (error) {
-            console.error('Error fetching for ' + columnName + ':', error);
-            returnData = [];
-        }
-        return returnData
     }
     async retriveFile(apiLink, column) {
         return await axios.post(apiLink, column, {

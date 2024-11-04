@@ -12,10 +12,6 @@
                             :error="errors.formCode" />
                     </div>
                     <div class="col-md-12">
-                        <select-component label="Department" :data="departmentList" v-model:value="formData.role"
-                            :error="errors.role" columnName="name" />
-                    </div>
-                    <div class="col-md-12">
                         <select-component label="procedure" :data="procedureList" v-model:value="formData.procedure"
                             :error="errors.procedure" columnName="procedure_name" />
                     </div>
@@ -65,7 +61,6 @@ export default {
         const formData = {
             formName: '',
             formCode: '',
-            role: '',
             procedure: '',
             status: '',
             file: [],
