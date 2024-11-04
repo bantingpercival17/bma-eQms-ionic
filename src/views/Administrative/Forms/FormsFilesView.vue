@@ -14,7 +14,8 @@
                     <ion-card style="height: 100%;">
                         <ion-card-content>
                             <div class="pdf-viewer-container" v-if="!contentLoading">
-                                <PDFViewerComponent v-if="fileLink" :pdfUrl="fileLink" :link="axiosLink" />
+                                <PDFViewerComponent v-if="fileLink" :fileID="fileLink" :link="axiosLink"
+                                    model="FormDocuments" />
                                 <div class="content-framce" v-else>
                                     <label for="" class="fw-bolder text-primary h3">SELECT FILES</label>
                                 </div>

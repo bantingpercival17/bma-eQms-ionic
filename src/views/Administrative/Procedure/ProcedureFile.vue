@@ -12,7 +12,8 @@
                     <ion-card>
                         <ion-card-content>
                             <div class="pdf-viewer-container">
-                                <PDFViewerComponent v-if="form.link" :pdfUrl="form.link" :link="axiosLink" />
+                                <PDFViewerComponent v-if="form.link" :fileID="form.link" :link="axiosLink"
+                                    model="ProcedureDocuments" />
                                 <div class="content-framce" v-else>
                                     <label for="" class="fw-bolder text-primary h3">SELECT FILES</label>
                                 </div>
@@ -24,48 +25,35 @@
                 </div>
                 <div class="col-md-5">
                     <AddProcedureFile :token="token" :procedure="encrypt(details.id)" />
-                    <ion-card class="mt-3">
-                        <ion-card-content>
-                            <div class="table-responsive">
-                                <table id="basic-table" class="table table-striped mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th id="actions" scope="col">ACTIONS</th>
-                                            <th id="documentType" scope="col">VERSION NUMBER</th>
-                                            <th>FILE PASSWORD</th>
+                    <div class="content-list">
+                        <label for="" class="text-primary fw-bolder h6">LIST OF FILE VERSION</label>
+                        <div v-if="details.files.length > 0" class="list">
+                            <ion-card v-for="item in details.files" :key="item.id">
+                                <ion-card-content>
+                                    <div class="float-end">
+                                        <ion-button size="default" color="primary" @click="viewItem(item)">
+                                            <ion-icon slot="icon-only" size="small" :icon="eye"></ion-icon>
+                                        </ion-button>
+                                        <ion-button size="default" color="danger" @click="deleteItem(item)">
+                                            <ion-icon slot="icon-only" size="small" :icon="trashSharp"></ion-icon>
+                                        </ion-button>
+                                    </div>
 
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <template v-if="details.files.length > 0">
-                                            <tr v-for="(procedure, index) in details.files" :key="index">
-                                                <td>
-                                                    <span @click="openPDF(encrypt(procedure.id))"
-                                                        class="btn btn-primary btn-sm me-3">VIEW PDF</span>
+                                    <span class="text-primary fw-bolder">VERSION {{ item.version }}</span>
+                                    <br>
+                                    <span class="fw-bolder text-muted">
+                                        {{ item.created_at }}
+                                    </span>
 
-                                                    <span class="btn btn-danger btn-sm me-3"
-                                                        @click="showConfirmation(procedure)">REMOVE</span>
-                                                </td>
-                                                <td class="fw-bolder">{{ procedure.version }}</td>
-                                                <td>
-                                                    <label class="text-muted "
-                                                        @click="copyToClipboard(procedure.password)">
-                                                        {{ procedure.password }}
-                                                    </label>
-                                                </td>
-
-                                            </tr>
-                                        </template>
-                                        <template v-else>
-                                            <tr>
-                                                <td colspan="3">No Data</td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </ion-card-content>
-                    </ion-card>
+                                </ion-card-content>
+                            </ion-card>
+                        </div>
+                        <ion-card v-else>
+                            <ion-card-content>
+                                <span class="text-primary fw-bolder h4">NO DATA</span>
+                            </ion-card-content>
+                        </ion-card>
+                    </div>
                 </div>
 
             </div>
@@ -83,16 +71,17 @@
 import axios from 'axios';
 import { mapGetters } from 'vuex';
 import { GET_USER_TOKEN } from '@/store/storeConstants.js';
-import { IonContent, loadingController, alertController, IonRefresher, IonRefresherContent, IonCard, IonCardContent } from '@ionic/vue';
+import { IonContent, loadingController, alertController, IonRefresher, IonRefresherContent, IonCard, IonIcon, IonButton, IonCardContent } from '@ionic/vue';
 import AddProcedureFile from '../Procedure/widgets/AddProcedureFile.vue'
 import PDFViewerComponent from '../../../components/PDFViewerComponent.vue'
 import ConfirmationAlert from '../../../components/alert/ConfirmationAlert.vue';
 import { GeneralController } from '../../../controller/GeneralContorller';
+import { trashSharp, eye } from 'ionicons/icons';
 export default {
     name: 'ProcedureFile',
     components: {
-        IonContent, loadingController, alertController, IonRefresher, IonRefresherContent, IonCard, IonCardContent,
-        AddProcedureFile, PDFViewerComponent, ConfirmationAlert
+        IonContent, loadingController, alertController, IonRefresher, IonRefresherContent, IonCard, IonIcon, IonButton, IonCardContent,
+        AddProcedureFile, PDFViewerComponent, ConfirmationAlert,
     },
     data() {
         return {
@@ -104,7 +93,8 @@ export default {
                 password: null
             },
             selectedProcedure: null,
-            axiosLink: '/open-pdf'
+            axiosLink: '/open-pdf',
+            trashSharp, eye
         };
     },
     computed: {
@@ -126,7 +116,7 @@ export default {
                     headers: { Authorization: `Bearer ${this.token}` }
                 });
                 this.details = response.data.procedure;
-                this.openPDF(this.encrypt(this.details.files[0].id))
+                this.viewItem(this.details.files[0])
             } catch (error) {
                 this.errorDetails = error;
                 console.error('Error fetching file content:', error);
@@ -141,7 +131,20 @@ export default {
         encrypt(data) {
             return btoa(data);
         },
-        openPDF(fileContent) {
+        async viewItem(data) {
+            this.contentLoading = true;
+            this.form.link = null; // Reset fileLink to trigger reactivity
+            setInterval(() => {
+                this.form.link = this.encrypt(data.id);
+                this.contentLoading = false;
+            }, 1000);
+
+        },
+        async deleteItem(data) {
+            this.selectedProcedure = data;
+            this.$refs.confirmationAlert.showAlert();
+        },
+        /* openPDF(fileContent) {
             // Set the link to null to clear the previous PDF
             this.form.link = null;
 
@@ -150,18 +153,10 @@ export default {
                 this.form.link = fileContent;
             }, 5000);
         },
-        async copyToClipboard(text) {
-            try {
-                await navigator.clipboard.writeText(text);
-                alert('Password copied to clipboard');
-            } catch (err) {
-                console.error('Failed to copy text: ', err);
-            }
-        },
         showConfirmation(data) {
             this.selectedProcedure = data;
             this.$refs.confirmationAlert.showAlert();
-        },
+        }, */
         async onConfirmed(data) {
             const loading = await this.$showLoading();
             try {

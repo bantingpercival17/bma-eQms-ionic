@@ -15,7 +15,7 @@
                     <ion-button size="default" shape="round" @click="printPdf">
                         <ion-icon slot="icon-only" size="small" :icon="print"></ion-icon>
                     </ion-button>
-                    <ion-button size="default" shape="round" @click="donwloadFile">
+                    <ion-button size="default" shape="round" @click="downloadFile">
                         <ion-icon slot="icon-only" size="small" :icon="downloadSharp"></ion-icon>
                     </ion-button>
                 </div>
@@ -46,22 +46,25 @@
 
 <script>
 
-import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton } from '@ionic/vue';
-import axios from 'axios';
+import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton, IonIcon } from '@ionic/vue';
 import { GeneralController } from '../controller/GeneralContorller';
 import { print, download, downloadSharp } from 'ionicons/icons';
 export default {
     props: {
-        pdfUrl: {
+        fileID: {
             type: String,
             required: true,
         },
         link: {
             type: String,
             required: true
+        },
+        model: {
+            type: String,
+            requred: true
         }
     },
-    components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton },
+    components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton, IonIcon },
     data() {
         return {
             pdfDoc: null,
@@ -76,15 +79,10 @@ export default {
         async loadFile() {
             this.error = null;
             try {
-                const response = await this.generalController.retriveFile(this.link, { link: this.pdfUrl });
-                console.log(response)
-                /*   const response = await axios.post(this.link, { link: this.pdfUrl }, {
-                      responseType: 'blob' // Important to handle the file as binary
-                  }); */
+                const response = await this.generalController.retriveFile(this.link, { link: this.fileID });
                 const blob = new Blob([response.data], { type: 'application/pdf' });
                 const url = window.URL.createObjectURL(blob);
                 this.pdfDoc = url; // Store the URL without fragments
-                console.log(this.pdfDoc);
             } catch (error) {
                 console.error(error);
                 this.error = 'Unable to load PDF. Check the password or PDF file.';
@@ -93,15 +91,35 @@ export default {
         },
         printPdf() {
             if (this.pdfDoc) {
+                this.generalController.printLog(this.model, { value: this.fileID })
                 const iframe = document.createElement('iframe');
                 iframe.style.display = 'none';
                 iframe.src = this.pdfDoc;
                 document.body.appendChild(iframe);
                 iframe.contentWindow.print();
+
             } else {
                 console.error('No PDF document available for printing.');
             }
         },
+        downloadFile() {
+            this.generalController.downloadFile(this.model, { value: this.fileID })
+                .then((response) => {
+                    // Create a URL for the blob response
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', 'Procedure.pdf'); // Specify the file name
+                    document.body.appendChild(link);
+                    link.click();
+                })
+                .catch((error) => {
+                    console.error('Error downloading file:', error);
+                    alert('Error downloading file. Please try again later.');
+                });
+        }
+
+
     },
     mounted() {
         this.generalController = new GeneralController();

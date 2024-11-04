@@ -70,4 +70,48 @@ export class GeneralController {
             });
 
     }
+    printLog(model, data) {
+        const links = {
+            FormDocuments: '/forms/form-documents/print',
+            ProcedureDocuments: '/procedure/procedure-documents/print'
+        };
+        const link = links[model] || null;
+
+        return axios.post(link, data, {
+            headers: {
+                Authorization: 'Bearer ' + this.token,
+                'Content-Type': 'multipart/form-data',
+            }
+        })
+            .then(response => {
+                // Return response for chaining
+                return response;
+            })
+            .catch(error => {
+                throw error; // Rethrow to allow `.catch` in the component
+            });
+    }
+    downloadFile(model, data) {
+        const links = {
+            FormDocuments: '/forms/form-documents/download',
+            ProcedureDocuments: '/procedure/procedure-documents/download'
+        };
+        const link = links[model] || null;
+
+        return axios.post(link, data, {
+            headers: {
+                Authorization: 'Bearer ' + this.token,
+                'Content-Type': 'multipart/form-data',
+            },
+            responseType: 'blob', // Important for file downloads
+
+        })
+            .then(response => {
+                // Return response for chaining
+                return response;
+            })
+            .catch(error => {
+                throw error; // Rethrow to allow `.catch` in the component
+            });
+    }
 }
