@@ -5,80 +5,36 @@
                 refreshing-text="Refreshing...">
             </ion-refresher-content>
         </ion-refresher>
-        <!--   <ion-content>
-
-        </ion-content> -->
         <div v-if="!errorDetails">
             <p class="display-6 fw-bolder text-primary">PROCEDURES</p>
             <div class="row">
-                <div class="col-md-4">
-                    <!--   <AddProcedureFile :token="token" :procedure="encrypt(details.id)" /> -->
-                    <ion-card class="mt-3">
-                        <ion-card-content>
-                            <div class="table-responsive">
-                                <table id="basic-table" class="table table-striped mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th class="">
-                                                <p class="text-primary fw-bolder h3">GENERAL PROCEDURES</p>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <template v-if="data.length > 0">
-                                            <tr v-for="(form, index) in data" :key="index">
-                                                <td>
-                                                    <label @click="openPDF(form.file.file_link, form.file.password)"
-                                                        class="text-primary fw-bolder" tooltip="Click To view">
-                                                        {{ form.procedure_name }}
-                                                    </label>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                        <template v-else>
-                                            <tr>
-                                                <td colspan="1">No Data</td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
+                <div class="col-md-5">
+                    <ion-accordion-group class="m-2" :multiple="true" :value="['section-one', 'section-two']">
+                        <ion-accordion value="section-one">
+                            <ion-item slot="header" color="light">
+                                <ion-label class="text-primary ">{{ upperCase('Quality Management Manual')
+                                    }}</ion-label>
+                            </ion-item>
+                            <div v-if="qmsManual.length > 0" class="ion-padding" slot="content"
+                                v-for="(data, index) in qmsManual" :key="index">
+                                {{ data.procedure_name }}
                             </div>
-                        </ion-card-content>
-                    </ion-card>
-                    <ion-card class="mt-3">
-                        <ion-card-content>
-                            <div class="table-responsive">
-                                <table id="basic-table" class="table table-striped mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th class="">
-                                                <p class="text-primary fw-bolder h3">DEPARTMENTAL PROCEDURES</p>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <template v-if="departments.length > 0">
-                                            <tr v-for="(form, index) in departments" :key="index">
-                                                <td>
-                                                    <label @click="openPDF(form.file.file_link, form.file.password)"
-                                                        class="text-primary fw-bolder" tooltip="Click To view">
-                                                        {{ form.procedure_name }}
-                                                    </label>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                        <template v-else>
-                                            <tr>
-                                                <td colspan="1">No Data</td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
+                            <div v-else class="ion-padding text-muted" slot="content">No Content</div>
+                        </ion-accordion>
+                        <ion-accordion value="section-two">
+                            <ion-item slot="header" color="light">
+                                <ion-label class="text-primary ">{{ upperCase('QMS Process') }}</ion-label>
+                            </ion-item>
+
+                            <div v-if="qmsProcess.length > 0" class="ion-padding" slot="content"
+                                v-for="(data, index) in qmsProcess" :key="index">
+                                {{ data.procedure_name }}
                             </div>
-                        </ion-card-content>
-                    </ion-card>
+                            <div v-else class="ion-padding text-muted" slot="content">No Content</div>
+                        </ion-accordion>
+                    </ion-accordion-group>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-7">
                     <ion-card>
                         <ion-card-content>
                             <div class="pdf-viewer-container">
@@ -99,55 +55,22 @@
 
 </template>
 <script>
-import axios from 'axios';
-import { mapGetters } from 'vuex';
-import { GET_USER_TOKEN } from '@/store/storeConstants.js';
-import { IonContent, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, } from '@ionic/vue';
+import { GeneralController } from '../../../controller/GeneralContorller';
+import { IonContent, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 export default {
     name: 'ProcedureView',
     components: {
-        IonContent, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent,
+        IonContent, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel
     },
     data() {
         return {
             isLoading: true,
-            data: [],
             errorDetails: null,
-            procedures: [],
-            departments: []
+            qmsManual: [],
+            qmsProcess: [],
         };
     },
-    computed: {
-        ...mapGetters('auth', {
-            token: GET_USER_TOKEN
-        })
-    },
     methods: {
-        async fetchDataList(apiLink, columnName) {
-            let returnData = []
-            try {
-                const response = await axios.get(apiLink, {
-                    headers: {
-                        Authorization: 'Bearer ' + this.token
-                    }
-                });
-                returnData = response.data[columnName];
-            } catch (error) {
-                console.error('Error fetching for ' + columnName + ':', error);
-                returnData = [];
-            }
-            return returnData
-        },
-        copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Password copied to clipboard');
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-        },
-        encrypt(data) {
-            return btoa(data)
-        },
         async handleScroll(event) {
             event.target.complete();
             //this.retriveForms()
@@ -174,41 +97,20 @@ export default {
                     this.isLoading = false
                 });
         },
-        openPDF(fileContent, password) {
-            navigator.clipboard.writeText(password).then(() => {
-
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-            const pdfViewer = this.$refs.pdfViewer;
-            //console.log(response)
-            pdfViewer.src = fileContent;
-            pdfViewer.password = password
-
+        async loadData() {
+            this.qmsManual = await this.generalController.retriveData('/procedure/retrive-procedure/v2/general', 'procedures')
+            this.qmsProcess = await this.generalController.retriveData('/procedure/retrive-procedure/v2/department', 'procedures')
+            this.isLoading = false
+            console.log(this.qmsProcess)
         },
-    },
-    mounted() {
-        this.retriveForms()
+        upperCase(data) {
+            return data.toUpperCase()
+        }
     },
     async created() {
-        //this.data = await this.fetchDataList('/procedure/retrive-procedure/v2/general', 'procedures')
-        this.departments = await this.fetchDataList('/procedure/retrive-procedure/v2/department', 'procedures')
+        this.generalController = new GeneralController();
+        this.loadData()
     }
 
 }
 </script>
-
-<style scoped>
-/* .scorm-container {
-    display: flex;
-    flex-direction: column;
-    height: 90vh;
-} */
-
-iframe {
-    flex: 1;
-    width: 100%;
-    height: 80vh;
-    border: none;
-}
-</style>
