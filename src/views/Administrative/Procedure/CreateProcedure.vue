@@ -1,17 +1,17 @@
 <template>
     <ion-card class="mt-3">
         <ion-card-content>
-            <ion-label class="fw-bolder h5 text-primary">CREATE PROCEDURE</ion-label>
+            <ion-label class="fw-bolder h5 text-primary">ADD PROCEDURE</ion-label>
             <div class="contact-form mt-3">
                 <form @submit.prevent="storeProcedure" method="post">
 
                     <div class="col-md-12">
-                        <select-component label="Department" :data="departmentList" v-model:value="formData.department"
-                            :error="errors.deparment" columnName="name" />
+                        <select-component label="Procedure" :data="proceduresList" v-model:value="formData.procedure"
+                            :error="errors.procedure" columnName="procedure_name" />
                     </div>
                     <div class="col-md-12">
-                        <input-component label="DOCUMENT NAME" v-model:value="formData.document_name"
-                            :error="errors.document_name" />
+                        <select-component label="Department Owner" :data="departmentList"
+                            v-model:value="formData.department" :error="errors.department" columnName="name" />
                     </div>
                     <div class="col-md-12">
                         <FileAttachComponent label="attach file" v-model:value="formData.file" :error="errors.file" />
@@ -55,7 +55,8 @@ export default {
         IonCard, IonCardContent, IonLabel, InputComponent, SelectComponent, FileAttachComponent, ConfirmationAlert
     },
     props: {
-        departmentList: Object
+        departmentList: Object,
+        proceduresList: Object
     },
     data() {
         const formData = {
@@ -67,13 +68,12 @@ export default {
         return {
             formData,
             errors: [],
-            procedures: [],
-            departments: [],
             selectedData: null,
         };
     },
     created() {
         this.generalController = new GeneralController();
+        console.log(this.proceduresList)
     },
     methods: {
         async storeProcedure() {
@@ -84,7 +84,7 @@ export default {
         async onConfirmed(data) {
             const loading = await this.$showLoading();
             try {
-                const response = await this.generalController.storeItem('procedure/store-procedure', data);
+                const response = await this.generalController.storeItem('procedure/store', data);
                 await this.$showMessageBox("PROCEDURE ADDED", response.data.data);
                 window.location.reload()
             } catch (error) {

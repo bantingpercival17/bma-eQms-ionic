@@ -61,7 +61,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="add-form">
-                        <CreateProcedure :departmentList="departments" />
+                        <CreateProcedure :departmentList="departments" :proceduresList="procedureList" />
                     </div>
                 </div>
             </div>
@@ -70,9 +70,6 @@
     </ion-content>
 </template>
 <script>
-import axios from 'axios';
-import { mapGetters } from 'vuex';
-import { GET_USER_TOKEN } from '@/store/storeConstants.js';
 import { IonCard, IonCardContent, IonContent, IonButton, IonSpinner, IonRefresher, IonRefresherContent, } from '@ionic/vue';
 import CreateProcedure from './CreateProcedure.vue';
 import ConfirmationAlert from '../../../components/alert/ConfirmationAlert.vue';
@@ -87,14 +84,10 @@ export default {
             isLoading: true,
             procedures: [],
             departments: [],
+            procedureList: [],
             selectedData: null,
             dataTable: false,
         };
-    },
-    computed: {
-        ...mapGetters('auth', {
-            token: GET_USER_TOKEN
-        })
     },
     methods: {
         async handleScroll(event) {
@@ -102,36 +95,10 @@ export default {
             this.isLoading = true
             await this.loadProcedures();
         },
-        openPdf(procId) {
-            axios.get(`retrieve-procedures/${procId}`, {
-                headers: {
-                    Authorization: 'Bearer ' + this.token
-                }
-            })
-                .then(response => {
-                    const fileContent = response.data.procedure.file_path;
-                    const pdfViewer = this.$refs.pdfViewer;
-                    //console.log(response)
-                    pdfViewer.src = fileContent;
-                })
-                .catch(error => {
-                    console.error('Error fetching file content:', error);
-                });
-        },
-        async fetchDataList(apiLink, columnName) {
-            let returnData = []
-            try {
-                const response = await axios.get(apiLink, {
-                    headers: {
-                        Authorization: 'Bearer ' + this.token
-                    }
-                });
-                returnData = response.data[columnName];
-            } catch (error) {
-                console.error('Error fetching for ' + columnName + ':', error);
-                returnData = [];
-            }
-            return returnData
+        async loadProcedures() {
+            this.procedures = await this.generalController.retriveData('procedure/retrive', 'procedures')
+            this.dataTable = true
+            this.isLoading = false
         },
         copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
@@ -166,17 +133,12 @@ export default {
         onCancelled() {
             console.log('Cancelled action');
         },
-        async loadProcedures() {
-            this.procedures = await this.fetchDataList('/procedure/retrive-procedure', 'procedures')
-            if (this.procedures.length > 0) {
-                this.dataTable = true
-            }
-            this.isLoading = false
-        }
+
     },
     async created() {
         this.generalController = new GeneralController();
-        this.departments = await this.fetchDataList('role-list', 'roles')
+        this.departments = await this.generalController.retriveData('department-list', 'departments')
+        this.procedureList = await this.generalController.retriveData('procedure/retrive/list', 'procedures')
         this.loadProcedures()
     },
 
