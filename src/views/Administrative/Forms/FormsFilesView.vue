@@ -14,7 +14,8 @@
                     <ion-card style="height: 100%;">
                         <ion-card-content>
                             <div class="pdf-viewer-container" v-if="!contentLoading">
-                                <PDFViewerComponent v-if="fileLink" :fileID="fileLink" :link="axiosLink"
+                                <PDFViewerComponent v-if="fileDetails.fileLink" :fileID="fileDetails.fileLink"
+                                    :link="fileDetails.axiosLink" :filename="fileDetails.filename"
                                     model="FormDocuments" />
                                 <div class="content-framce" v-else>
                                     <label for="" class="fw-bolder text-primary h3">SELECT FILES</label>
@@ -110,8 +111,11 @@ export default {
             contentList: [],
             contentLoading: false,
             errorDetails: '',
-            fileLink: null,
-            axiosLink: 'forms/retrive/file/',
+            fileDetails: {
+                fileLink: null,
+                axiosLink: 'forms/retrive/file/',
+                filename: null
+            },
             trashSharp,
             eye,
             removeData: []
@@ -136,9 +140,11 @@ export default {
         },
         async viewItem(data) {
             this.contentLoading = true;
-            this.fileLink = null; // Reset fileLink to trigger reactivity
+            this.fileDetails.fileLink = null; // Reset fileLink to trigger reactivity
+            this.fileDetails.filename = null
             setInterval(() => {
-                this.fileLink = this.encrypt(data.id);
+                this.fileDetails.fileLink = this.encrypt(data.id);
+                this.fileDetails.filename = this.contentItem.form_code
                 this.contentLoading = false;
             }, 1000);
 
@@ -156,6 +162,7 @@ export default {
                 this.retriveDataList()
 
             } catch (error) {
+                await loading.dismiss();
                 await this.$showMessageBox(error.code, error.message);
             } finally {
                 await loading.dismiss();

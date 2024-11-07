@@ -114,4 +114,24 @@ export class GeneralController {
                 throw error; // Rethrow to allow `.catch` in the component
             });
     }
+    async retriveAnalytics(model, data) {
+        const links = {
+            FormDocuments: '/forms/form-documents/analytics',
+            ProcedureDocuments: '/procedure/procedure-documents/analytics'
+        };
+        const apiLink = links[model] || null;
+        return await axios.post(apiLink, data, {
+            headers: {
+                Authorization: 'Bearer ' + this.token,
+            },
+        }).then(response => {
+            // Return response for chaining
+            return response;
+        })
+            .catch(error => {
+                return []
+                throw error; // Rethrow to allow `.catch` in the component
+
+            });
+    }
 }

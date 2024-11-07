@@ -11,12 +11,30 @@
         </div>
         <div v-else>
             <div class="full-screen-container-a">
-                <div class="button-tool float-end mb-3">
+                <!--  <div class="button-tool float-end mb-3">
                     <ion-button size="default" shape="round" @click="printPdf">
                         <ion-icon slot="icon-only" size="small" :icon="print"></ion-icon>
                     </ion-button>
                     <ion-button size="default" shape="round" @click="downloadFile">
                         <ion-icon slot="icon-only" size="small" :icon="downloadSharp"></ion-icon>
+                    </ion-button>
+                </div> -->
+                <div class="interaction-group" aria-label="Social interaction stats" role="group">
+                    <!-- Views (non-interactive link) -->
+                    <ion-button fill="clear" aria-label="Views">
+                        <ion-icon :icon="eyeOutline" size="small"></ion-icon>
+                        <span>{{ analyticData ? analyticData.viewedLogs : 0 }}</span>
+                    </ion-button>
+                    <!-- Download -->
+                    <ion-button fill="clear" aria-label="Download-Count" @click="downloadFile">
+                        <ion-icon :icon="downloadOutline" size="meduim"></ion-icon>
+                        <span>{{ analyticData.downloadLogs }}</span>
+                    </ion-button>
+
+                    <!-- Print -->
+                    <ion-button fill="clear" aria-label="Print Count" @click="printPdf">
+                        <ion-icon :icon="printOutline" size="small"></ion-icon>
+                        <span>{{ analyticData.printLogs }}</span>
                     </ion-button>
                 </div>
                 <iframe v-if="pdfDoc" :src="`${pdfDoc}#toolbar=0&navpanes=0`" class=" full-screen-iframe"
@@ -42,13 +60,24 @@
     border: none;
     /* Remove iframe border */
 }
+
+.interaction-group {
+    display: flex;
+    /*  justify-content: space-between; */
+    /*   padding: 10px; */
+}
+
+ion-button span {
+    margin-left: 5px;
+    font-size: 16px;
+}
 </style>
 
 <script>
 
-import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton, IonIcon } from '@ionic/vue';
+import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton, IonIcon, IonItem, IonLabel } from '@ionic/vue';
 import { GeneralController } from '../controller/GeneralContorller';
-import { print, download, downloadSharp } from 'ionicons/icons';
+import { print, download, downloadSharp, eyeOutline, downloadOutline, printOutline } from 'ionicons/icons';
 export default {
     props: {
         fileID: {
@@ -62,9 +91,13 @@ export default {
         model: {
             type: String,
             requred: true
+        },
+        filename: {
+            type: String,
+            required: true
         }
     },
-    components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton, IonIcon },
+    components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton, IonIcon, IonItem, IonLabel },
     data() {
         return {
             pdfDoc: null,
@@ -72,10 +105,20 @@ export default {
             numPages: 0,
             error: null,
             errorMessage: null,
-            print, download, downloadSharp
+            analyticData: [],
+            print, download, downloadSharp, eyeOutline, downloadOutline, printOutline
         };
     },
     methods: {
+        async analiytics() {
+            await this.generalController.retriveAnalytics(this.model, { value: this.fileID })
+                .then(response => {
+                    this.analyticData = response.data
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        },
         async loadFile() {
             this.error = null;
             try {
@@ -97,21 +140,25 @@ export default {
                 iframe.src = this.pdfDoc;
                 document.body.appendChild(iframe);
                 iframe.contentWindow.print();
-
+                this.analiytics()
             } else {
                 console.error('No PDF document available for printing.');
             }
         },
-        downloadFile() {
+        async downloadFile() {
+            const loading = await this.$showLoading();
             this.generalController.downloadFile(this.model, { value: this.fileID })
-                .then((response) => {
+                .then(async (response) => {
+                    const filename = this.filename + ' - ' + Date.now() + '.pdf'
                     // Create a URL for the blob response
+                    await loading.dismiss();
                     const url = window.URL.createObjectURL(new Blob([response.data]));
                     const link = document.createElement('a');
                     link.href = url;
-                    link.setAttribute('download', 'Procedure.pdf'); // Specify the file name
+                    link.setAttribute('download', filename); // Specify the file name
                     document.body.appendChild(link);
                     link.click();
+                    this.analiytics()
                 })
                 .catch((error) => {
                     console.error('Error downloading file:', error);
@@ -124,7 +171,7 @@ export default {
     mounted() {
         this.generalController = new GeneralController();
         this.loadFile()
-
+        this.analiytics()
         //window.addEventListener("keydown", this.disableBackNavigation);
     },
 };
