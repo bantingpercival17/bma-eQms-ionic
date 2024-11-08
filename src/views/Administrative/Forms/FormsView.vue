@@ -128,7 +128,10 @@ export default {
 
             this.errorDetails = null
             this.details = []
-            const response = await this.generalController.retriveData('forms/retrive-forms?search=' + this.searchTerm, 'forms')
+            const form = {
+                search: this.searchTerm
+            }
+            const response = await this.generalController.retrieveData('forms/v2/retrieve-forms', form, 'forms')
             this.data = response.data
             //console.log(this.data.data)
             this.isLoading = false

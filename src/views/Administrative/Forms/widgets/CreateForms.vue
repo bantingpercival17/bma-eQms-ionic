@@ -25,8 +25,8 @@
                             </label>
                             <select v-model="formData.status" class="form-select form-select-sm border border-primary">
                                 <option value="">Select Status</option>
-                                <option value="1">GENERAL PROCEDURE</option>
-                                <option value="0">DEPARTMENTAL PROCEDURE</option>
+                                <option value="1">GENERAL FORMS</option>
+                                <option value="0">DEPARTMENTAL FORMS</option>
                             </select>
                             <span class="badge bg-danger mt-2" v-if="errors['status']">{{
                                 errors['status'][0] }}</span>

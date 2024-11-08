@@ -7,6 +7,22 @@ export class GeneralController {
     constructor() {
         this.token = store.getters[`auth/${GET_USER_TOKEN}`]; // Assign the user token in the constructor
     }
+    async retrieveData(apiLink, formData, columnName) {
+        return axios.post(apiLink, formData, {
+            headers: {
+                Authorization: 'Bearer ' + this.token
+            }
+        })
+            .then(response => {
+                // Return response for chaining
+                return response.data[columnName];
+            })
+            .catch(error => {
+                return []
+                throw error; // Rethrow to allow `.catch` in the component
+
+            });
+    }
     async retriveData(apiLink, columnName) {
         return axios.get(apiLink, {
             headers: {

@@ -17,24 +17,28 @@
                             <form>
                                 <div class="form-group">
                                     <small class="text-muted fw-bolder">SEARCH</small>
-                                    <input type="text" class="form-control form-control-sm border border-primary">
+                                    <input type="text" v-model="searchTerm" onkey="retrieveContents"
+                                        class="form-control form-control-sm border border-primary">
                                 </div>
                                 <div class="form-group">
                                     <small class="text-muted fw-bolder">FILLTER </small>
-                                    <select name="" id="" class="form-select form-select-sm border border-primary">
+                                    <select v-model="selectedProcedure"
+                                        class="form-select form-select-sm border border-primary">
                                         <option value="0" selected> Select Procedure</option>
                                     </select>
 
                                 </div>
                                 <div class="form-group">
-                                    <select name="" id="" class="form-select form-select-sm border border-primary">
-                                        <option value="0" selected> Select Form Status</option>
+                                    <select v-model="selectedFormStatus"
+                                        class="form-select form-select-sm border border-primary">
+                                        <option value="1" selected> GENERAL FORMS</option>
+                                        <option value="0" selected> DEPARTMENTAL FORMS</option>
                                     </select>
                                 </div>
                             </form>
                         </ion-card-content>
                     </ion-card>
-                    <div v-if="data.length > 0">
+                    <div v-if="data">
                         <ion-card v-for="(item, index) in data" :key="index">
                             <ion-card-content @click="viewForms(item)">
                                 <small class="text-muted fw-bolder">{{ item.form_code }}</small>
@@ -99,25 +103,47 @@ export default {
             data: [],
             isLoading: true,
             errorDetails: null,
-            retriveContentLink: '/forms/retrive-general-forms',
-            form
+            retriveContentLink: '/retrive-forms',
+            form,
+            searchTerm: '',
+            selectedProcedure: 0,
+            selectedFormStatus: 1
         }
+    },
+    watch: {
+        searchTerm: 'retrieveSearchData',
+        selectedProcedure: 'retrieveSearchData',
+        selectedFormStatus: 'retrieveSearchData'
     },
     mounted() {
         this.generalController = new GeneralController()
-        this.retriveContents()
+        this.retrieveContents()
     },
     methods: {
         async handleScroll(event) {
             event.target.complete();
-            this.retriveContents()
+            this.retrieveContents()
         },
-        async retriveContents() {
+        async retrieveContents() {
             this.isLoading = true
             this.errorDetails = null
-            this.data = await this.generalController.retriveData(this.retriveContentLink, 'forms')
-            this.data = this.data.data
+            const form = {
+                search: this.searchTerm,
+                procedure: this.selectedProcedure,
+                common: this.selectedFormStatus
+            }
+            const response = await this.generalController.retrieveData('forms/v2/retrieve-forms', form, 'forms')
+            this.data = response.data
             this.isLoading = false
+        },
+        async retrieveSearchData() {
+            const form = {
+                search: this.searchTerm,
+                procedure: this.selectedProcedure,
+                common: this.selectedFormStatus
+            }
+            const response = await this.generalController.retrieveData('forms/v2/retrieve-forms', form, 'forms')
+            this.data = response.data
         },
         encrypt(data) {
             return btoa(data)

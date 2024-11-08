@@ -11,14 +11,9 @@
         </div>
         <div v-else>
             <div class="full-screen-container-a">
-                <!--  <div class="button-tool float-end mb-3">
-                    <ion-button size="default" shape="round" @click="printPdf">
-                        <ion-icon slot="icon-only" size="small" :icon="print"></ion-icon>
-                    </ion-button>
-                    <ion-button size="default" shape="round" @click="downloadFile">
-                        <ion-icon slot="icon-only" size="small" :icon="downloadSharp"></ion-icon>
-                    </ion-button>
-                </div> -->
+                <route-link v-if="model == 'FormDocuments'" class="btn btn-outline-info btn-sm float-end">CREATE
+                    REQUEST FORM
+                </route-link>
                 <div class="interaction-group" aria-label="Social interaction stats" role="group">
                     <!-- Views (non-interactive link) -->
                     <ion-button fill="clear" aria-label="Views">
@@ -37,6 +32,7 @@
                         <span>{{ analyticData ? analyticData.printLogs : '' }}</span>
                     </ion-button>
                 </div>
+
                 <iframe v-if="pdfDoc" :src="`${pdfDoc}#toolbar=0&navpanes=0`" class=" full-screen-iframe"
                     frameborder="0" @contextmenu.prevent></iframe>
             </div>
