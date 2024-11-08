@@ -171,4 +171,24 @@ export class GeneralController {
 
             });
     }
+    async getAnalytics(model, data, column) {
+        const links = {
+            FormDocuments: '/forms/show/analytics',
+            ProcedureDocuments: '/procedure/show/analytics'
+        };
+        const apiLink = links[model] || null;
+        return await axios.post(apiLink, data, {
+            headers: {
+                Authorization: 'Bearer ' + this.token,
+            },
+        }).then(response => {
+            // Return response for chaining
+            return response.data[column];
+        })
+            .catch(error => {
+                return []
+                throw error; // Rethrow to allow `.catch` in the component
+
+            });
+    }
 }

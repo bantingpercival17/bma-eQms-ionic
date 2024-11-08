@@ -11,12 +11,12 @@
         </div>
         <div v-else>
             <div class="full-screen-container-a">
-                <route-link v-if="model == 'FormDocuments'" class="btn btn-outline-info btn-sm float-end">CREATE
+                <!-- <route-link v-if="model == 'FormDocuments'" class="btn btn-outline-info btn-sm float-end">CREATE
                     REQUEST FORM
-                </route-link>
+                </route-link> -->
                 <div class="interaction-group" aria-label="Social interaction stats" role="group">
                     <!-- Views (non-interactive link) -->
-                    <ion-button fill="clear" aria-label="Views">
+                    <ion-button fill="clear" aria-label="Views" @click="viewLogs">
                         <ion-icon :icon="eyeOutline" size="small"></ion-icon>
                         <span>{{ analyticData ? analyticData.viewedLogs : 0 }}</span>
                     </ion-button>
@@ -37,6 +37,7 @@
                     frameborder="0" @contextmenu.prevent></iframe>
             </div>
         </div>
+        <ActivityModalComponent :isOpen="isModalOpen" @close="isModalOpen = false" :activityLogs="analyticsDetails" />
     </div>
 </template>
 
@@ -74,6 +75,7 @@ ion-button span {
 import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton, IonIcon, IonItem, IonLabel } from '@ionic/vue';
 import { GeneralController } from '../controller/GeneralContorller';
 import { print, download, downloadSharp, eyeOutline, downloadOutline, printOutline } from 'ionicons/icons';
+import ActivityModalComponent from './ActivityModalComponent.vue';
 export default {
     props: {
         fileID: {
@@ -89,7 +91,10 @@ export default {
             required: true
         }
     },
-    components: { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton, IonIcon, IonItem, IonLabel },
+    components: {
+        IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton, IonIcon, IonItem, IonLabel,
+        ActivityModalComponent
+    },
     data() {
         return {
             pdfDoc: null,
@@ -98,7 +103,9 @@ export default {
             error: null,
             errorMessage: null,
             analyticData: [],
-            print, download, downloadSharp, eyeOutline, downloadOutline, printOutline
+            print, download, downloadSharp, eyeOutline, downloadOutline, printOutline,
+            isModalOpen: false,
+            analyticsDetails: []
         };
     },
     methods: {
@@ -156,8 +163,12 @@ export default {
                     console.error('Error downloading file:', error);
                     alert('Error downloading file. Please try again later.');
                 });
-        }
+        },
+        async viewLogs() {
+            this.isModalOpen = true;
+            this.analyticsDetails = await this.generalController.getAnalytics(this.model, { value: this.fileID }, 'activityLogs')
 
+        }
 
     },
     mounted() {
