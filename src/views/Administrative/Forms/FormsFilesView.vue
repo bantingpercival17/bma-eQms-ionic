@@ -15,8 +15,7 @@
                         <ion-card-content>
                             <div class="pdf-viewer-container" v-if="!contentLoading">
                                 <PDFViewerComponent v-if="fileDetails.fileLink" :fileID="fileDetails.fileLink"
-                                    :link="fileDetails.axiosLink" :filename="fileDetails.filename"
-                                    model="FormDocuments" />
+                                    :filename="fileDetails.filename" model="FormDocuments" />
                                 <div class="content-framce" v-else>
                                     <label for="" class="fw-bolder text-primary h3">SELECT FILES</label>
                                 </div>
@@ -113,7 +112,6 @@ export default {
             errorDetails: '',
             fileDetails: {
                 fileLink: null,
-                axiosLink: 'forms/retrive/file/',
                 filename: null
             },
             trashSharp,
@@ -142,12 +140,10 @@ export default {
             this.contentLoading = true;
             this.fileDetails.fileLink = null; // Reset fileLink to trigger reactivity
             this.fileDetails.filename = null
-            setInterval(() => {
-                this.fileDetails.fileLink = this.encrypt(data.id);
-                this.fileDetails.filename = this.contentItem.form_code
-                this.contentLoading = false;
-            }, 1000);
-
+            await this.$nextTick();
+            this.fileDetails.fileLink = this.encrypt(data.id);
+            this.fileDetails.filename = this.contentItem.form_code
+            this.contentLoading = false;
         },
         async deleteItem(data) {
             this.removeData = data;

@@ -25,12 +25,16 @@
                                     <select v-model="selectedProcedure"
                                         class="form-select form-select-sm border border-primary">
                                         <option value="0" selected> Select Procedure</option>
+                                        <option v-for="(data, index) in procedures" :key='index' :value="data.id">
+                                            {{ data.procedure_name }}
+                                        </option>
                                     </select>
 
                                 </div>
                                 <div class="form-group">
                                     <select v-model="selectedFormStatus"
                                         class="form-select form-select-sm border border-primary">
+                                        <option value="" selected> ALL FORMS</option>
                                         <option value="1" selected> GENERAL FORMS</option>
                                         <option value="0" selected> DEPARTMENTAL FORMS</option>
                                     </select>
@@ -62,8 +66,8 @@
                                 <label for="" class="fw-bolder text-primary h6">{{ form.form_name }}</label>
                                 <br>
                                 <small class="text-muted fw-bolder">{{ form.form_code }}</small>
-                                <PDFViewerComponent v-if="form.fileID" :filename="form.form_name" :link="form.link"
-                                    :fileID="form.fileID" model="FormDocuments" />
+                                <PDFViewerComponent v-if="form.fileID" :filename="form.form_name" :fileID="form.fileID"
+                                    model="FormDocuments" />
                                 <div class="content-frame" v-else>
                                     <label for="" class="fw-bolder text-primary h6"></label>
                                 </div>
@@ -95,7 +99,6 @@ export default {
         const form = {
             form_name: 'FORM NAME',
             form_code: 'FORM CODE',
-            link: 'forms/retrive/file/',
             fileID: null
         }
         return {
@@ -103,11 +106,10 @@ export default {
             data: [],
             isLoading: true,
             errorDetails: null,
-            retriveContentLink: '/retrive-forms',
             form,
             searchTerm: '',
             selectedProcedure: 0,
-            selectedFormStatus: 1
+            selectedFormStatus: ''
         }
     },
     watch: {
@@ -134,6 +136,7 @@ export default {
             }
             const response = await this.generalController.retrieveData('forms/v2/retrieve-forms', form, 'forms')
             this.data = response.data
+            this.procedures = await this.generalController.retriveData('procedure/retrive', 'procedures')
             this.isLoading = false
         },
         async retrieveSearchData() {

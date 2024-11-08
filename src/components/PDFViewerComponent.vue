@@ -80,10 +80,6 @@ export default {
             type: String,
             required: true,
         },
-        link: {
-            type: String,
-            required: true
-        },
         model: {
             type: String,
             requred: true
@@ -118,7 +114,7 @@ export default {
         async loadFile() {
             this.error = null;
             try {
-                const response = await this.generalController.retriveFile(this.link, { link: this.fileID });
+                const response = await this.generalController.retrieveFile(this.model, { link: this.fileID });
                 const blob = new Blob([response.data], { type: 'application/pdf' });
                 const url = window.URL.createObjectURL(blob);
                 this.pdfDoc = url; // Store the URL without fragments

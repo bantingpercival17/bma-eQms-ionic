@@ -12,8 +12,8 @@
                     <ion-card>
                         <ion-card-content>
                             <div class="pdf-viewer-container">
-                                <PDFViewerComponent v-if="form.link" :fileID="form.link" :link="axiosLink"
-                                    model="ProcedureDocuments" />
+                                <PDFViewerComponent v-if="form.link" :fileID="form.link"
+                                    :filename="details.procedure_code" model="ProcedureDocuments" />
                                 <div class="content-framce" v-else>
                                     <label for="" class="fw-bolder text-primary h3">SELECT FILES</label>
                                 </div>
@@ -93,7 +93,6 @@ export default {
                 password: null
             },
             selectedProcedure: null,
-            axiosLink: '/open-pdf',
             trashSharp, eye
         };
     },

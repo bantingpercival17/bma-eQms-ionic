@@ -50,8 +50,8 @@
                                 <div class="pdf-viewer-container" v-if="!contentLoading">
                                     <div v-if="procedureItem">
                                         <PDFViewerComponent v-if="procedureItem.fileID"
-                                            :filename="procedureItem.procedure_code" :link="procedureItem.link"
-                                            :fileID="procedureItem.fileID" model="ProcedureDocuments" />
+                                            :filename="procedureItem.procedure_code" :fileID="procedureItem.fileID"
+                                            model="ProcedureDocuments" />
                                         <div class="content-frame" v-else>
                                             <label for="" class="fw-bolder text-primary h6">EMPTY FILE</label>
                                         </div>

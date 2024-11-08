@@ -39,6 +39,27 @@ export class GeneralController {
 
             });
     }
+    async retrieveFile(model, data) {
+        const links = {
+            FormDocuments: '/forms/retrive-file',
+            ProcedureDocuments: /* '/open-pdf' */ 'procedure/procedure-documents/view'
+        };
+        const apiLink = links[model] || null;
+        return await axios.post(apiLink, data, {
+            headers: {
+                Authorization: 'Bearer ' + this.token,
+            },
+            responseType: 'blob' // Important to handle the file as binary
+        }).then(response => {
+            // Return response for chaining
+            return response;
+        })
+            .catch(error => {
+                return []
+                throw error; // Rethrow to allow `.catch` in the component
+
+            });
+    }
     async retriveFile(apiLink, column) {
         return await axios.post(apiLink, column, {
             headers: {
