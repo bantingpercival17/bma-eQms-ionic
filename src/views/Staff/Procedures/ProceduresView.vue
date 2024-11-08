@@ -38,14 +38,14 @@
                     <ion-card>
                         <ion-card-content>
                             <div class="pdf-viewer-container">
-                                <label for="" class="fw-bolder text-primary h3">
+                                <label for="" class="fw-bolder text-primary h5">
 
                                     {{ procedureItem ?
-                                        procedureItem.procedure_name : 'Procedure Name' }}
+                                        procedureItem.procedure_name : 'PROCEDURE NAME' }}
                                 </label>
                                 <br>
                                 <small class="text-muted fw-bolder">
-                                    {{ procedureItem ? procedureItem.procedure_code : 'Procedure Code' }}
+                                    {{ procedureItem ? procedureItem.procedure_code : 'PROCEDURE CODE' }}
                                 </small>
                                 <div class="pdf-viewer-container" v-if="!contentLoading">
                                     <div v-if="procedureItem">

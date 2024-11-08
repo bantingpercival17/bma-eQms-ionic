@@ -12,9 +12,31 @@
             <p class="display-6 fw-bolder text-primary">{{ pageTitle }}</p>
             <div class="row">
                 <div class="col-md-5">
+                    <ion-card>
+                        <ion-card-content>
+                            <form>
+                                <div class="form-group">
+                                    <small class="text-muted fw-bolder">SEARCH</small>
+                                    <input type="text" class="form-control form-control-sm border border-primary">
+                                </div>
+                                <div class="form-group">
+                                    <small class="text-muted fw-bolder">FILLTER </small>
+                                    <select name="" id="" class="form-select form-select-sm border border-primary">
+                                        <option value="0" selected> Select Procedure</option>
+                                    </select>
+
+                                </div>
+                                <div class="form-group">
+                                    <select name="" id="" class="form-select form-select-sm border border-primary">
+                                        <option value="0" selected> Select Form Status</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </ion-card-content>
+                    </ion-card>
                     <div v-if="data.length > 0">
                         <ion-card v-for="(item, index) in data" :key="index">
-                            <ion-card-content @click="openPDF(item)">
+                            <ion-card-content @click="viewForms(item)">
                                 <small class="text-muted fw-bolder">{{ item.form_code }}</small>
                                 <br>
                                 <label for="" class="fw-bolder text-primary h6">{{ item.form_name }}</label>
@@ -36,8 +58,11 @@
                                 <label for="" class="fw-bolder text-primary h6">{{ form.form_name }}</label>
                                 <br>
                                 <small class="text-muted fw-bolder">{{ form.form_code }}</small>
-                                <PDFViewerComponent v-if="form.link" :pdfUrl="form.link" :pdfPassword="form.password" />
-                                <!--   <iframe id="pdfViewer" class="pdf-viewer" ref="pdfViewer"></iframe> -->
+                                <PDFViewerComponent v-if="form.fileID" :filename="form.form_name" :link="form.link"
+                                    :fileID="form.fileID" model="FormDocuments" />
+                                <div class="content-frame" v-else>
+                                    <label for="" class="fw-bolder text-primary h6"></label>
+                                </div>
                             </div>
                         </ion-card-content>
                     </ion-card>
@@ -54,11 +79,9 @@
     </div>
 </template>
 <script>
-import axios from 'axios';
-import { mapGetters } from 'vuex';
-import { GET_USER_TOKEN } from '@/store/storeConstants.js';
 import { IonContent, loadingController, IonRefresher, IonRefresherContent, IonCard, IonCardContent } from '@ionic/vue';
 import PDFViewerComponent from '../../../components/PDFViewerComponent.vue'
+import { GeneralController } from '../../../controller/GeneralContorller';
 export default {
     name: 'GeneralForms',
     components: {
@@ -68,8 +91,8 @@ export default {
         const form = {
             form_name: 'FORM NAME',
             form_code: 'FORM CODE',
-            link: null,
-            password: null,
+            link: 'forms/retrive/file/',
+            fileID: null
         }
         return {
             pageTitle: 'GENERAL FORMS',
@@ -80,54 +103,33 @@ export default {
             form
         }
     },
-    computed: {
-        ...mapGetters('auth', {
-            token: GET_USER_TOKEN,
-        })
-    },
     mounted() {
+        this.generalController = new GeneralController()
         this.retriveContents()
     },
     methods: {
-        async retriveContents() {
-            this.isLoading = true
-            this.errorDetails = null
-            this.data = []
-            axios.get(this.retriveContentLink, {
-                headers: {
-                    Authorization: 'Bearer ' + this.token
-                }
-            })
-                .then(response => {
-                    console.log(response.data)
-                    this.data = response.data.forms
-                    this.isLoading = false
-                })
-                .catch(error => {
-                    this.errorDetails = error
-                    console.error('Error fetching file content:', error);
-                    this.isLoading = false
-                });
-        },
         async handleScroll(event) {
             event.target.complete();
             this.retriveContents()
         },
+        async retriveContents() {
+            this.isLoading = true
+            this.errorDetails = null
+            this.data = await this.generalController.retriveData(this.retriveContentLink, 'forms')
+            this.data = this.data.data
+            this.isLoading = false
+        },
         encrypt(data) {
             return btoa(data)
         },
-        async openPDF(item) {
-            this.form.form_name = item.form_name
-            this.form.form_code = item.form_code
-            //this.form.link = item.document.file_link
-            this.form.link = 'http://127.0.0.1:8000/storage/PROCEDURE%202.pdf'
-            this.form.password = item.document.password
-            navigator.clipboard.writeText(this.form.password).then(() => {
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-            console.log(this.form)
-
+        async viewForms(data) {
+            this.form.form_code = data.form_code
+            this.form.form_name = data.form_name
+            this.form.fileID = null
+            await this.$nextTick();
+            if (data.document) {
+                this.form.fileID = this.encrypt(data.document.id)
+            }
         },
     },
 }
