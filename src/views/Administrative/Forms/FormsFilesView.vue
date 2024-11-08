@@ -38,10 +38,10 @@
                             <ion-card v-for="item in contentList" :key="item.id">
                                 <ion-card-content>
                                     <div class="float-end">
-                                        <ion-button size="default" color="primary" @click="() => viewItem(item)">
+                                        <ion-button size="default" color="primary" @click="viewItem(item)">
                                             <ion-icon slot="icon-only" size="small" :icon="eye"></ion-icon>
                                         </ion-button>
-                                        <ion-button size="default" color="danger" @click="() => deleteItem(item)">
+                                        <ion-button size="default" color="danger" @click="deleteItem(item)">
                                             <ion-icon slot="icon-only" size="small" :icon="trashSharp"></ion-icon>
                                         </ion-button>
                                     </div>

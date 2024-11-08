@@ -11,26 +11,26 @@
                 <div class="col-md-5">
                     <ion-accordion-group class="m-2" :multiple="true" :value="['section-one', 'section-two']">
                         <ion-accordion value="section-one">
-                            <ion-item slot="header" color="light">
-                                <ion-label class="text-primary ">{{ upperCase('Quality Management Manual')
-                                    }}</ion-label>
+                            <ion-item slot="header" color="light" class="accordion-header">
+                                <ion-label class="text-primary">{{ upperCase('Quality Management Manual') }}</ion-label>
                             </ion-item>
-                            <div v-if="qmsManual.length > 0" class="ion-padding" slot="content"
-                                v-for="(data, index) in qmsManual" :key="index">
-                                {{ data.procedure_name }}
+                            <div v-if="qmsManual.length > 0" class="ion-padding accordion-content" slot="content"
+                                v-for="(data, index) in qmsManual" :key="index" @click="viewItem('one-' + index, data)">
+                                <span :class="itemStyle('one-' + index)"> {{ data.procedure_name }}</span>
                             </div>
-                            <div v-else class="ion-padding text-muted" slot="content">No Content</div>
+                            <div v-else class="ion-padding text-muted accordion-content" slot="content">No Content</div>
                         </ion-accordion>
                         <ion-accordion value="section-two">
                             <ion-item slot="header" color="light">
                                 <ion-label class="text-primary ">{{ upperCase('QMS Process') }}</ion-label>
                             </ion-item>
-
-                            <div v-if="qmsProcess.length > 0" class="ion-padding" slot="content"
-                                v-for="(data, index) in qmsProcess" :key="index">
-                                {{ data.procedure_name }}
+                            <div v-if="qmsProcess.length > 0" class="ion-padding accordion-content" slot="content"
+                                v-for="(data, index) in qmsProcess" :key="index"
+                                @click="viewItem('two-' + index, data)">
+                                <span :class="itemStyle('two-' + index)"> {{ data.procedure_name }}</span>
                             </div>
-                            <div v-else class="ion-padding text-muted" slot="content">No Content</div>
+                            <div v-else class="ion-padding text-muted accordion-content" slot="content">No Content</div>
+
                         </ion-accordion>
                     </ion-accordion-group>
                 </div>
@@ -38,7 +38,31 @@
                     <ion-card>
                         <ion-card-content>
                             <div class="pdf-viewer-container">
-                                <iframe id="pdfViewer" class="pdf-viewer" ref="pdfViewer"></iframe>
+                                <label for="" class="fw-bolder text-primary h3">
+
+                                    {{ procedureItem ?
+                                        procedureItem.procedure_name : 'Procedure Name' }}
+                                </label>
+                                <br>
+                                <small class="text-muted fw-bolder">
+                                    {{ procedureItem ? procedureItem.procedure_code : 'Procedure Code' }}
+                                </small>
+                                <div class="pdf-viewer-container" v-if="!contentLoading">
+                                    <div v-if="procedureItem">
+                                        <PDFViewerComponent v-if="procedureItem.fileID"
+                                            :filename="procedureItem.procedure_code" :link="procedureItem.link"
+                                            :fileID="procedureItem.fileID" model="ProcedureDocuments" />
+                                        <div class="content-frame" v-else>
+                                            <label for="" class="fw-bolder text-primary h6">EMPTY FILE</label>
+                                        </div>
+                                    </div>
+                                    <div class="content-frame" v-else>
+                                        <label for="" class="fw-bolder text-primary h6">SELECT FILES</label>
+                                    </div>
+                                </div>
+                                <div v-else>
+                                    <label for="" class="fw-bolder text-primary h6">LOADING...</label>
+                                </div>
                             </div>
                         </ion-card-content>
                     </ion-card>
@@ -54,13 +78,25 @@
     </div>
 
 </template>
+<style>
+.accordion-content {
+    cursor: default;
+}
+
+.accordion-content:hover {
+    color: #18995B;
+    /* Adjust as needed */
+}
+</style>
 <script>
 import { GeneralController } from '../../../controller/GeneralContorller';
+import PDFViewerComponent from '../../../components/PDFViewerComponent.vue'
 import { IonContent, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 export default {
     name: 'ProcedureView',
     components: {
-        IonContent, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel
+        IonContent, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel,
+        PDFViewerComponent
     },
     data() {
         return {
@@ -68,44 +104,53 @@ export default {
             errorDetails: null,
             qmsManual: [],
             qmsProcess: [],
+            selectedItem: null,
+            procedureItem: null,
+            contentLoading: false
         };
     },
     methods: {
         async handleScroll(event) {
             event.target.complete();
-            //this.retriveForms()
-            this.departments = await this.fetchDataList('role-list', 'roles')
-            this.data = await this.fetchDataList('/procedure/retrive-procedure', 'procedures')
-        },
-        async retriveForms() {
             this.isLoading = true
-            this.errorDetails = null
-            this.details = []
-            axios.get(`/procedure/retrive-procedure/v2/general`, {
-                headers: {
-                    Authorization: 'Bearer ' + this.token
-                }
-            })
-                .then(response => {
-                    console.log(response.data)
-                    this.data = response.data.procedures
-                    this.isLoading = false
-                })
-                .catch(error => {
-                    this.errorDetails = error
-                    console.error('Error fetching file content:', error);
-                    this.isLoading = false
-                });
+            this.loadData()
         },
         async loadData() {
             this.qmsManual = await this.generalController.retriveData('/procedure/retrive-procedure/v2/general', 'procedures')
             this.qmsProcess = await this.generalController.retriveData('/procedure/retrive-procedure/v2/department', 'procedures')
             this.isLoading = false
-            console.log(this.qmsProcess)
         },
+
         upperCase(data) {
             return data.toUpperCase()
-        }
+        },
+        encrypt(data) {
+            return btoa(data)
+        },
+        async viewItem(index, data) {
+            this.contentLoading = true
+            this.selectedItem = index
+            this.procedureItem = null
+            await this.$nextTick();
+            this.viewProcedure(data)
+        },
+        async viewProcedure(data) {
+            this.procedureItem = data
+            if (data.file) {
+                this.procedureItem.fileID = this.encrypt(data.file.id)
+                console.log(this.procedureItem.fileID)
+            } else {
+                this.procedureItem.fileID = null
+            }
+            this.procedureItem.link = "procedure/procedure-documents/view"
+            this.contentLoading = false
+        },
+        itemStyle(data) {
+            return data == this.selectedItem ? 'text-primary' : ''
+        },
+        encrypt(data) {
+            return btoa(data)
+        },
     },
     async created() {
         this.generalController = new GeneralController();

@@ -134,10 +134,10 @@ export default {
         async viewItem(data) {
             this.contentLoading = true;
             this.form.link = null; // Reset fileLink to trigger reactivity
-            setInterval(() => {
-                this.form.link = this.encrypt(data.id);
-                this.contentLoading = false;
-            }, 1000);
+            console.log(data.id)
+            await this.$nextTick(); // Wait for the DOM to update/react to the null assignment
+            this.form.link = this.encrypt(data.id);
+            this.contentLoading = false;
 
         },
         async deleteItem(data) {

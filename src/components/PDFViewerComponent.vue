@@ -28,13 +28,13 @@
                     <!-- Download -->
                     <ion-button fill="clear" aria-label="Download-Count" @click="downloadFile">
                         <ion-icon :icon="downloadOutline" size="meduim"></ion-icon>
-                        <span>{{ analyticData.downloadLogs }}</span>
+                        <span>{{ analyticData ? analyticData.downloadLogs : '' }}</span>
                     </ion-button>
 
                     <!-- Print -->
                     <ion-button fill="clear" aria-label="Print Count" @click="printPdf">
                         <ion-icon :icon="printOutline" size="small"></ion-icon>
-                        <span>{{ analyticData.printLogs }}</span>
+                        <span>{{ analyticData ? analyticData.printLogs : '' }}</span>
                     </ion-button>
                 </div>
                 <iframe v-if="pdfDoc" :src="`${pdfDoc}#toolbar=0&navpanes=0`" class=" full-screen-iframe"
