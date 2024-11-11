@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-content class="main-content">
-      <ClientNavigation></ClientNavigation>
+     <!--  <ClientNavigation></ClientNavigation> -->
       <div class="fuild-container">
         <router-view></router-view>
       </div>

@@ -11,6 +11,18 @@ export class RouteModel {
             component: importComponent
         };
     }
+    appendUserRoute(prop, name, path, metaName, userType, importComponent) {
+        return {
+            path: path,
+            name: prop + name,
+            meta: {
+                auth: true,
+                name: metaName,
+                user: userType
+            },
+            component: importComponent
+        };
+    }
     adminUserMiddleware(to, from, next) {
         if (to.meta.user !== 'admin') {
             next('/admin/dashboard')

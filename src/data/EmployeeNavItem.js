@@ -1,10 +1,12 @@
+const prop = 'staff-layout'
+
 const dashboard = [
-    { name: 'Announcements', url: '/staff/Announcements' },
+    { name: 'Announcements', url: prop + '.announcements' },
 ];
 const qms = [
-    { name: 'Procedures', url: '/staff/procedures' },
-    { name: 'Forms', url: '/staff/general-forms' },
-    { name: 'Mission and Vision', url: '/staff/mission-and-vision' }
+    { name: 'Procedures', url: prop + '.procedures' },
+    { name: 'Forms', url: prop + '.general-forms' },
+    { name: 'Mission and Vision', url: prop + '.mission-and-vision' }
 ]
 
 
@@ -13,11 +15,11 @@ const qms = [
       { name: 'Department Policy', url: '/staff/Department-Policy' },
   ]; */
 const forms = [
-    { name: 'Draft', url: '/' },
-    { name: 'Submitted', url: '/' }
+    { name: 'Draft', url: prop + '.maintenance-view' },
+    { name: 'Submitted', url: prop + '.maintenance-view' }
 ]
 const setting = [
-    { name: 'Profile', url: '/staff/Profile' },
+    { name: 'Profile', url: prop + '.profile', },
 ];
 
 const items = [

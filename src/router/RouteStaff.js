@@ -2,8 +2,6 @@ import {
   RouteModel
 } from './RouteModel'
 const routeModel = new RouteModel()
-
-const path = '@/views/Staff/'
 const userType = 'staff'
 export const staffRoute = (prop) => [{
   path: '/',
@@ -97,10 +95,10 @@ export const staffRoute = (prop) => [{
   component: () => import('../views/StaffSide/Procedure/Procedures.vue')
 },
 /* Procedure */
-routeModel.appendRoute(prop, '.procedures', '/staff/procedures', 'Procedures', () => import('@/views/Staff/Procedures/ProceduresView.vue'), userType),
+routeModel.appendUserRoute(prop, '.procedures', '/staff/procedures', 'Procedures', userType, () => import('@/views/Staff/Procedures/ProceduresView.vue')),
 /* Forms */
-routeModel.appendRoute(prop, '.departmental-forms', '/staff/departmental-forms', 'DEPARTMENTAL FORMS', () => import('@/views/Staff/Forms/DepartmentalForms.vue'), userType),
-routeModel.appendRoute(prop, '.general-forms', '/staff/general-forms', 'GENERAL FORMS', () => import('@/views/Staff/Forms/GeneralForms.vue'), userType),
-routeModel.appendRoute(prop, '.mission-and-vision', '/staff/mission-and-vision', () => import('@/views/Staff/MissionAndVision/View.vue')),
-
+routeModel.appendUserRoute(prop, '.departmental-forms', '/staff/departmental-forms', 'DEPARTMENTAL FORMS', userType, () => import('@/views/Staff/Forms/DepartmentalForms.vue')),
+routeModel.appendUserRoute(prop, '.general-forms', '/staff/general-forms', 'GENERAL FORMS', userType, () => import('@/views/Staff/Forms/GeneralForms.vue')),
+routeModel.appendUserRoute(prop, '.mission-and-vision', '/staff/mission-and-vision', 'Mission and Vision', userType, () => import('@/views/Staff/MissionAndVision/View.vue')),
+routeModel.appendUserRoute(prop, '.maintenance-view', '/staff/maintenance', 'Mission and Vision', userType, () => import('@/views/MaintenanceView.vue')),
 ]

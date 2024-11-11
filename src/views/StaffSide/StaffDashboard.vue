@@ -4,7 +4,8 @@
       <h2 class="announcement-title">Latest Announcements</h2>
       <div v-for="(announcement, index) in announcements" :key="index" class="announcement-post">
         <div class="announcement-header">
-          <span class="announcement-sender">{{ announcement.sender }} <span class="department"> > {{ announcement.department }}</span></span>
+          <span class="announcement-sender">{{ announcement.sender }} <span class="department"> > {{
+            announcement.department }}</span></span>
           <span class="announcement-date">{{ formatDate(announcement.date) }}</span>
         </div>
         <div class="announcement-content">
@@ -13,7 +14,8 @@
           </p>
           <p v-else>
             {{ announcement.content.substring(0, maxContentLength) }}...
-            <button @click="toggleContent(index)" class="view-more">{{ announcement.showFullContent ? 'View Less' : 'View More' }}</button>
+            <button @click="toggleContent(index)" class="view-more">{{ announcement.showFullContent ? 'View Less' :
+              'View More' }}</button>
           </p>
         </div>
       </div>
@@ -32,7 +34,11 @@
 </template>
 
 <script>
+import { IonContent, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 export default {
+  components: {
+    IonContent, IonAccordionGroup, IonItem, IonLabel
+  },
   data() {
     return {
       maxContentLength: 200,
@@ -148,7 +154,7 @@ export default {
 }
 
 .work-procedure-placeholder {
-  margin-top: 50px; 
+  margin-top: 50px;
   text-align: left;
   margin-left: 5%;
   margin-right: 5%;
@@ -164,7 +170,7 @@ export default {
 }
 
 .document-placeholder {
-  margin-top: 20px; 
+  margin-top: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 10px;

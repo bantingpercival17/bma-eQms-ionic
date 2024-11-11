@@ -36,11 +36,11 @@ const settings = [{
     url: '/administrative/user-management'
 },];
 const records = [
-    { name: 'Document Control Register', url: '' },
-    { name: 'Training', url: '' },
-    { name: 'Ched Marina Internal Audit Record', url: '' },
-    { name: 'ClassNK Internal Audit Record', url: '' },
-    { name: 'Meeting of the Minutes', url: '' }
+    { name: 'Document Control Register', url: '/admin/announcement' },
+    { name: 'Training', url: '/admin/announcement' },
+    { name: 'Ched Marina Internal Audit Record', url: '/admin/announcement' },
+    { name: 'ClassNK Internal Audit Record', url: '/admin/announcement' },
+    { name: 'Meeting of the Minutes', url: '/admin/announcement' }
 ]
 const items = [{
     name: 'Dashboard',

@@ -8,11 +8,11 @@
         <div v-if="!errorDetails">
             <p class="display-6 fw-bolder text-primary">MISSION AND VISION</p>
             <div class="row">
-                <div class="col-md-5">
-
-                </div>
-                <div class="col-md-7">
-
+                <div class="col-md">
+                    <div v-for="(item, index) in data" :key="index">
+                        <label for="" class="h3 fw-boder text-primary">{{ item.title }}</label>
+                        <p>{{ item.data }}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -25,29 +25,23 @@
     </div>
 
 </template>
-<style>
-.accordion-content {
-    cursor: default;
-}
-
-.accordion-content:hover {
-    color: #18995B;
-    /* Adjust as needed */
-}
-</style>
 <script>
-import { GeneralController } from '../../../controller/GeneralContorller';
-import PDFViewerComponent from '../../../components/PDFViewerComponent.vue'
 import { IonContent, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 export default {
-    name: 'ProcedureView',
+    name: 'MissionAndVision',
     components: {
         IonContent, IonButton, IonRefresher, IonRefresherContent, IonCard, IonCardContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel,
-        PDFViewerComponent
     },
     data() {
+        const mission = "The Baliwag Maritime Academy shall offer its students a competency based Maritime Education & Training Program to produce competent marine officers with an adequate knowledge, attitudes, & leadership skills necessary in pursuing their respective professional maritime career which complies to national and international standards."
+        const vision = "The Baliwag Maritime Academy as one of the leading Maritime Higher Educational Institution visualizes itself as a producer of highly competent marine officers who will excel in the practice of the seafaring profession in both domestic and international shipping, and as competent maritime educators."
+        const data = [
+            { title: 'MISSION', data: mission },
+            { title: 'VISION', data: vision }
+        ]
         return {
-            isLoading: true,
+            isLoading: false,
+            data
         };
     },
     methods: {

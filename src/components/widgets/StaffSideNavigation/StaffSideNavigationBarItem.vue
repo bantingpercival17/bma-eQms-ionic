@@ -11,17 +11,27 @@
                     <ion-item slot="header">
                         <ion-label>{{ data.name }}</ion-label>
                     </ion-item>
-                    <ion-item v-for="(data1, index1) in data.child" :key="index1" class="ms-5 p-2" slot="content">
-                        <router-link v-if="data1.url" :to="data1.url">
+                    <div class="ion-padding accordion-content" slot="content" v-for="(data1, index) in data.child"
+                        :key="index">
+                        <router-link v-if="data1.url" :to="{ name: data1.url }">
                             <ion-label>{{ data1.name }}</ion-label>
                         </router-link>
-                    </ion-item>
+                    </div>
                 </template>
             </ion-accordion>
         </ion-accordion-group>
     </div>
 </template>
+<style>
+.accordion-content {
+    cursor: default;
+}
 
+.accordion-content:hover {
+    color: #18995B;
+    /* Adjust as needed */
+}
+</style>
 <script>
 import { IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 import { RouterLink } from 'vue-router';
