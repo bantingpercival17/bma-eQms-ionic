@@ -25,7 +25,7 @@
 <script>
 import { IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 import { RouterLink } from 'vue-router';
-
+import EmployeeNavItem from '../../../data/EmployeeNavItem';
 export default {
     name: 'StaffSideNavigationBar',
     components: {
@@ -38,45 +38,8 @@ export default {
 
     data() {
 
-        const dashboard = [
-            { name: 'Announcements', url: '/staff/Announcements' },
-        ];
-        const qms = [
-            { name: 'Procedures', url: '/staff/procedures' },
-            { name: 'Forms', url: '/staff/general-forms' },
-            { name: 'Mission and Vission', url: '/staff/departmental-forms' }
-        ]
-        const procedure = [
-            { name: 'Procedures', url: '/staff/procedure' },
-            /* { name: 'Department Procedures', url: '/staff/department-procedure' }, */
-        ];
-
-        /*   const policy = [
-              { name: 'General Policy', url: '/staff/General-Policy' },
-              { name: 'Department Policy', url: '/staff/Department-Policy' },
-          ]; */
-
-        const form = [
-            { name: 'General Forms', url: '/staff/General-Form' },
-            { name: 'Department Forms', url: '/staff/Department-Form' }
-        ];
-
-        /*  const procedure = [
-             { name: 'Procedures Documents', url: '/staff/Procedure' },
-         ]; */
-
-        const setting = [
-            { name: 'Profile', url: '/staff/Profile' },
-        ];
-
-        const items = [
-            { name: 'Dashboard', child: dashboard },
-            { name: 'E-QMS', child: qms },
-            { name: 'Settings', child: setting },
-        ];
-
         return {
-            items
+            items: EmployeeNavItem.items
         };
     }
 };

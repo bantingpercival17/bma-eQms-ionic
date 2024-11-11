@@ -1,19 +1,19 @@
 const dashboard = [{
-        name: 'Statistics',
-        url: '/admin/statistics'
-    },
-    {
-        name: 'Announcements',
-        url: '/admin/announcement'
-    },
-    {
-        name: 'Monitoring',
-        url: '/admin/monitoring'
-    },
-    {
-        name: 'Calendar',
-        url: '/admin/calendar'
-    },
+    name: 'Statistics',
+    url: '/admin/statistics'
+},
+{
+    name: 'Announcements',
+    url: '/admin/announcement'
+},
+{
+    name: 'Monitoring',
+    url: '/admin/monitoring'
+},
+{
+    name: 'Calendar',
+    url: '/admin/calendar'
+},
 ];
 
 const managing = [
@@ -34,24 +34,35 @@ const managing = [
 const settings = [{
     name: 'Account Management',
     url: '/administrative/user-management'
-}, ];
-
+},];
+const records = [
+    { name: 'Document Control Register', url: '' },
+    { name: 'Training', url: '' },
+    { name: 'Ched Marina Internal Audit Record', url: '' },
+    { name: 'ClassNK Internal Audit Record', url: '' },
+    { name: 'Meeting of the Minutes', url: '' }
+]
 const items = [{
-        name: 'Dashboard',
-        child: dashboard,
-        link: null
-    },
-    {
-        name: 'QMS',
-        child: managing,
-        link: null
-    },
-    {
-        name: 'Settings',
-        child: settings,
-        link: null
-    },
-    /*      { name: 'User Management', child:[], link: '/administrative/user-management' } */
+    name: 'Dashboard',
+    child: dashboard,
+    link: null
+},
+{
+    name: 'QMS',
+    child: managing,
+    link: null
+},
+{
+    name: 'Records',
+    child: records,
+    link: null
+},
+{
+    name: 'Settings',
+    child: settings,
+    link: null
+},
+
 ];
 
 export default {

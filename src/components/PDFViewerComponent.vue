@@ -11,9 +11,9 @@
         </div>
         <div v-else>
             <div class="full-screen-container-a">
-                <!-- <route-link v-if="model == 'FormDocuments'" class="btn btn-outline-info btn-sm float-end">CREATE
+                <route-link v-if="model == 'FormDocuments'" class="btn btn-outline-info btn-sm float-end">CREATE
                     REQUEST FORM
-                </route-link> -->
+                </route-link>
                 <div class="interaction-group" aria-label="Social interaction stats" role="group">
                     <!-- Views (non-interactive link) -->
                     <ion-button fill="clear" aria-label="Views" @click="viewLogs">
@@ -27,9 +27,14 @@
                     </ion-button>
 
                     <!-- Print -->
-                    <ion-button fill="clear" aria-label="Print Count" @click="printPdf">
+                    <!--  <ion-button fill="clear" aria-label="Print Count" @click="printPdf">
                         <ion-icon :icon="printOutline" size="small"></ion-icon>
                         <span>{{ analyticData ? analyticData.printLogs : '' }}</span>
+                    </ion-button> -->
+                    <!-- Download -->
+                    <ion-button slot="end" fill="clear" aria-label="Download-Count" @click="downloadFile">
+                        <ion-icon :icon="downloadOutline" size="meduim"></ion-icon>
+                        <span>DOWNLOAD</span>
                     </ion-button>
                 </div>
 

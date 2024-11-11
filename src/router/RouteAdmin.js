@@ -13,7 +13,9 @@ export const adminRoute = (prop) => [
   /* Forms */
   routeModel.appendRoute(prop, '.form-view', '/admin/forms/', 'Forms', () => import('@/views/Administrative/Forms/FormsView.vue'), userType),
   routeModel.appendRoute(prop, '.form-view-files', '/admin/forms/:view/files/', 'Form File', () => import('@/views/Administrative/Forms/FormsFilesView.vue'), userType),
-
+  /* Form Drafts */
+  /* Mission And Vission */
+  routeModel.appendRoute(prop, '.mission-and-vision', '/admin/mission-and-vision', () => import('@/views/Administrative/MissionAndVision/View.vue')),
   {
     path: '/admin/Add-Policy-Documents',
     name: prop + '.add-policy-documents',
