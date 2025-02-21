@@ -4,7 +4,7 @@ const dashboard = [{
 },
 {
     name: 'Announcements',
-    url: '/admin/announcement'
+    url: '/admin/announcement-v2'
 },
 {
     name: 'Monitoring',
@@ -40,7 +40,7 @@ const records = [
     { name: 'Training', url: '/admin/announcement' },
     { name: 'Ched Marina Internal Audit Record', url: '/admin/announcement' },
     { name: 'ClassNK Internal Audit Record', url: '/admin/announcement' },
-    { name: 'Meeting of the Minutes', url: '/admin/announcement' }
+    { name: 'Minutes of the Meeting', url: '/admin/announcement' }
 ]
 const items = [{
     name: 'Dashboard',

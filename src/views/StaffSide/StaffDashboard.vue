@@ -2,26 +2,35 @@
   <ion-content>
     <div class="announcement">
       <h2 class="announcement-title">Latest Announcements</h2>
-      <div v-for="(announcement, index) in announcements" :key="index" class="announcement-post">
+
+
+      <div v-for="(announcement, index) in announcementsList" :key="index" class="announcement-post">
         <div class="announcement-header">
-          <span class="announcement-sender">{{ announcement.sender }} <span class="department"> > {{
-            announcement.department }}</span></span>
-          <span class="announcement-date">{{ formatDate(announcement.date) }}</span>
+          <span class="announcement-sender">
+            {{ announcement.user.name }}
+            <span class="department"> {{ announcement.department?.name }}</span>
+
+          </span>
+
+          <span class="announcement-date">{{ formatDate(announcement.created_at) }}</span>
         </div>
         <div class="announcement-content">
-          <p v-if="announcement.showFullContent || announcement.content.length < maxContentLength">
+          <h4 class="text-primary fw-bolder">
+            {{ announcement.title }}
+          </h4>
+          <p v-if="announcement.content || announcement.content.length < maxContentLength">
             {{ announcement.content }}
           </p>
           <p v-else>
             {{ announcement.content.substring(0, maxContentLength) }}...
-            <button @click="toggleContent(index)" class="view-more">{{ announcement.showFullContent ? 'View Less' :
+            <button @click="toggleContent(index)" class="view-more">{{ announcement.content ? 'View Less' :
               'View More' }}</button>
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Work Procedures -->
+    <!--  
     <div class="work-procedure-placeholder">
       <h2 class="placeholder-title">Work Procedure</h2>
       <div v-for="(procedure, index) in workProcedures" :key="index" class="document-placeholder">
@@ -29,12 +38,13 @@
         <p class="document-department">Department: {{ procedure.department }}</p>
         <button @click="viewProcedure(procedure)" class="view-button">View</button>
       </div>
-    </div>
+    </div> -->
   </ion-content>
 </template>
 
 <script>
 import { IonContent, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
+import { GeneralController } from '../../controller/GeneralContorller';
 export default {
   components: {
     IonContent, IonAccordionGroup, IonItem, IonLabel
@@ -42,36 +52,13 @@ export default {
   data() {
     return {
       maxContentLength: 200,
-      announcements: [
-        {
-          sender: "Admin",
-          department: "IT Department",
-          date: "2024-03-25",
-          content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget lectus neque. Integer at libero sed justo aliquam scelerisque vel at libero. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-          showFullContent: false
-        },
-        {
-          sender: "HR Department",
-          department: "Human Resources",
-          date: "2024-03-24",
-          content: "Short content Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-          showFullContent: false
-        },
-      ],
-      workProcedures: [
-        {
-          title: "Document Title 1",
-          department: "IT Department",
-          content: "Procedure content for Document 1."
-        },
-        {
-          title: "Document Title 2",
-          department: "Human Resources",
-          content: "Procedure content for Document 2."
-        }
-        // Add more work procedures as needed
-      ]
+      announcementsList: []
     };
+  },
+  async created() {
+    this.generalController = new GeneralController();
+    this.departments = await this.generalController.retriveData('role-list', 'roles')
+    this.retrieveData()
   },
   methods: {
     toggleContent(index) {
@@ -84,7 +71,14 @@ export default {
     viewProcedure(procedure) {
       // Show the full content of the selected work procedure
       alert(procedure.content);
-    }
+    },
+    async retrieveData() {
+
+      this.errorDetails = null
+      this.announcementsList = await this.generalController.retriveData('/announcement/fetch-announcement', 'announcementList')
+      this.isLoading = false
+
+    },
   }
 };
 </script>

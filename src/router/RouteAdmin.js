@@ -15,7 +15,9 @@ export const adminRoute = (prop) => [
   routeModel.appendRoute(prop, '.form-view-files', '/admin/forms/:view/files/', 'Form File', () => import('@/views/Administrative/Forms/FormsFilesView.vue'), userType),
   /* Form Drafts */
   /* Mission And Vission */
-  routeModel.appendRoute(prop, '.mission-and-vision', '/admin/mission-and-vision', () => import('@/views/Administrative/MissionAndVision/View.vue'),userType),
+  routeModel.appendRoute(prop, '.mission-and-vision', '/admin/mission-and-vision', () => import('@/views/Administrative/MissionAndVision/View.vue'), userType),
+  /* Announcement */
+  //  routeModel.appendRoute(prop, '.announcements-v2', '/admin/announcement-v2', () => import('@/views/Administrative/Announcement/AnnouncementView.vue'), userType),
   {
     path: '/admin/Add-Policy-Documents',
     name: prop + '.add-policy-documents',
@@ -145,5 +147,15 @@ export const adminRoute = (prop) => [
       user: 'admin'
     },
     component: () => import('../views/Students/Management/Settings/EditAccount.vue')
+  },
+  {
+    path: '/admin/announcement-v2',
+    name: prop + '.annnouncement-v2',
+    meta: {
+      auth: true,
+      name: 'Announcement',
+      user: 'admin'
+    },
+    component: () => import('@/views/Administrative/Announcement/AnnouncementView.vue')
   },
 ]
