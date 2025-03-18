@@ -21,21 +21,21 @@
                         <span>{{ analyticData ? analyticData.viewedLogs : 0 }}</span>
                     </ion-button>
                     <!-- Download -->
-                    <ion-button fill="clear" aria-label="Download-Count" @click="downloadFile">
+                    <!-- <ion-button fill="clear" aria-label="Download-Count" @click="downloadFile">
                         <ion-icon :icon="downloadOutline" size="meduim"></ion-icon>
                         <span>{{ analyticData ? analyticData.downloadLogs : '' }}</span>
-                    </ion-button>
+                    </ion-button> -->
 
                     <!-- Print -->
-                    <!--  <ion-button fill="clear" aria-label="Print Count" @click="printPdf">
+                     <ion-button fill="clear" aria-label="Print Count" @click="printPdf">
                         <ion-icon :icon="printOutline" size="small"></ion-icon>
                         <span>{{ analyticData ? analyticData.printLogs : '' }}</span>
-                    </ion-button> -->
+                    </ion-button>
                     <!-- Download -->
-                    <ion-button slot="end" fill="clear" aria-label="Download-Count" @click="downloadFile">
+                    <!-- <ion-button slot="end" fill="clear" aria-label="Download-Count" @click="downloadFile">
                         <ion-icon :icon="downloadOutline" size="meduim"></ion-icon>
                         <span>DOWNLOAD</span>
-                    </ion-button>
+                    </ion-button> -->
                 </div>
 
                 <iframe v-if="pdfDoc" :src="`${pdfDoc}#toolbar=0&navpanes=0`" class=" full-screen-iframe"

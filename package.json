@@ -17,7 +17,7 @@
     "@ionic/vue-router": "^7.0.0",
     "axios": "^1.6.7",
     "bootstrap": "^5.3.3",
-    "bootstrap-vue": "^2.23.0",
+    "bootstrap-vue": "^2.23.1",
     "chart.js": "^3.0.0",
     "ionicons": "^7.3.1",
     "pdfjs-dist": "^4.7.76",
@@ -30,8 +30,8 @@
   },
   "devDependencies": {
     "@babel/plugin-syntax-import-assertions": "^7.25.6",
-    "@vitejs/plugin-legacy": "^5.0.0",
-    "@vitejs/plugin-vue": "^4.0.0",
+    "@vitejs/plugin-legacy": "^6.0.2",
+    "@vitejs/plugin-vue": "^5.2.1",
     "@vue/test-utils": "^2.3.0",
     "cypress": "^13.5.0",
     "eslint": "^8.35.0",
@@ -39,8 +39,8 @@
     "jsdom": "^22.1.0",
     "sass": "^1.72.0",
     "terser": "^5.28.1",
-    "vite": "^5.0.0",
-    "vitest": "^0.34.6",
+    "vite": "^6.2.1",
+    "vitest": "^3.0.8",
     "worker-loader": "^3.0.8"
   },
   "description": "An Ionic project"

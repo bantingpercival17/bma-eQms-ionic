@@ -35,8 +35,8 @@
                                 </ion-footer>
                             </ion-card>
                             <div class="mt-3 mb-3">
-                                <PaginationComponent :currentPage="pagination.current" :totalPages="pagination.total"
-                                    @change="data" />
+                                <PaginationComponent :currentPage="pagination.current"
+                                    :totalPages="pagination.last_page" @page-changed="retriveForms" />
                             </div>
                         </div>
                         <div v-else>
@@ -101,7 +101,7 @@ export default {
         };
     },
     mounted() {
-        this.retriveForms()
+        this.retriveForms(this.pagination.current)
     },
     async created() {
         this.generalController = new GeneralController();
@@ -124,15 +124,21 @@ export default {
             this.isLoading = true
             this.refershFunction()
         },
-        async retriveForms() {
+        async retriveForms(data) {
 
             this.errorDetails = null
             this.details = []
             const form = {
-                search: this.searchTerm
+                search: this.searchTerm,
+                page: data
             }
             const response = await this.generalController.retrieveData('forms/v2/retrieve-forms', form, 'forms')
             this.data = response.data
+            this.pagination = {
+                current: response.current_page,
+                last_page: response.last_page,
+                total: response.total
+            }
             //console.log(this.data.data)
             this.isLoading = false
 

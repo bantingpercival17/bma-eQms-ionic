@@ -42,14 +42,21 @@
                             </form>
                         </ion-card-content>
                     </ion-card>
-                    <div v-if="data">
+
+                    <div v-if="data.length">
+                        <div class="mt-3 mb-3">
+                            <PaginationComponent :currentPage="pagination.current" :totalPages="pagination.last_page"
+                                @page-changed="retrieveContents" />
+                        </div>
                         <ion-card v-for="(item, index) in data" :key="index">
                             <ion-card-content @click="viewForms(item)">
+                                <small class="badge bg-info float-end">{{ item.procedure.procedure_code }}</small>
                                 <small class="text-muted fw-bolder">{{ item.form_code }}</small>
                                 <br>
                                 <label for="" class="fw-bolder text-primary h6">{{ item.form_name }}</label>
                             </ion-card-content>
                         </ion-card>
+
                     </div>
                     <div v-else>
                         <ion-card>
@@ -90,10 +97,11 @@
 import { IonContent, loadingController, IonRefresher, IonRefresherContent, IonCard, IonCardContent } from '@ionic/vue';
 import PDFViewerComponent from '../../../components/PDFViewerComponent.vue'
 import { GeneralController } from '../../../controller/GeneralContorller';
+import PaginationComponent from '../../../components/widgets/PaginationComponent.vue';
 export default {
     name: 'GeneralForms',
     components: {
-        IonContent, loadingController, IonRefresher, IonRefresherContent, IonCard, IonCardContent, PDFViewerComponent
+        IonContent, loadingController, IonRefresher, IonRefresherContent, IonCard, IonCardContent, PDFViewerComponent, PaginationComponent
     },
     data() {
         const form = {
@@ -109,7 +117,11 @@ export default {
             form,
             searchTerm: '',
             selectedProcedure: 0,
-            selectedFormStatus: ''
+            selectedFormStatus: '',
+            pagination: {
+                current: 1,
+                total: 1
+            }
         }
     },
     watch: {
@@ -124,18 +136,24 @@ export default {
     methods: {
         async handleScroll(event) {
             event.target.complete();
-            this.retrieveContents()
+            this.retrieveContents(this.pagination.current)
         },
-        async retrieveContents() {
+        async retrieveContents(data) {
             this.isLoading = true
             this.errorDetails = null
             const form = {
                 search: this.searchTerm,
                 procedure: this.selectedProcedure,
-                common: this.selectedFormStatus
+                common: this.selectedFormStatus,
+                page: data
             }
             const response = await this.generalController.retrieveData('forms/v2/retrieve-forms', form, 'forms')
             this.data = response.data
+            this.pagination = {
+                current: response.current_page,
+                last_page: response.last_page,
+                total: response.total
+            }
             this.procedures = await this.generalController.retriveData('procedure/retrive', 'procedures')
             this.isLoading = false
         },
@@ -143,9 +161,14 @@ export default {
             const form = {
                 search: this.searchTerm,
                 procedure: this.selectedProcedure,
-                common: this.selectedFormStatus
+                common: parseInt(this.selectedFormStatus, 10)
             }
             const response = await this.generalController.retrieveData('forms/v2/retrieve-forms', form, 'forms')
+            this.pagination = {
+                current: response.current_page,
+                last_page: response.last_page,
+                total: response.total
+            }
             this.data = response.data
         },
         encrypt(data) {

@@ -96,7 +96,7 @@ export default {
                     password: payload.password
                 })
                 if (response.status === 200) {
-                    const user_type = response.data.role.id === 1 ? 'admin' : 'staff'
+                    const user_type = response.data.role.role.id === 1 ? 'admin' : 'staff'
                     const tokenData = {
                         name: response.data.name,
                         email: response.data.email,
