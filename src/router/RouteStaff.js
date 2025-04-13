@@ -101,4 +101,8 @@ routeModel.appendUserRoute(prop, '.departmental-forms', '/staff/departmental-for
 routeModel.appendUserRoute(prop, '.general-forms', '/staff/general-forms', 'GENERAL FORMS', userType, () => import('@/views/Staff/Forms/GeneralForms.vue')),
 routeModel.appendUserRoute(prop, '.mission-and-vision', '/staff/mission-and-vision', 'Mission and Vision', userType, () => import('@/views/Staff/MissionAndVision/View.vue')),
 routeModel.appendUserRoute(prop, '.maintenance-view', '/staff/maintenance', 'Mission and Vision', userType, () => import('@/views/MaintenanceView.vue')),
+/* Risk and Opportunity */
+routeModel.appendUserRoute(prop, '.risk-and-opportunity', '/staff/risk-and-opportunity', 'Risk and Opportunity', userType, () => import('@/views/Module/RiskOpportunity/View.vue')),
+routeModel.appendUserRoute(prop, '.risk-and-opportunity-create', '/staff/risk-and-opportunity/create', 'Create Risk and Opportunity', userType, () => import('@/views/Module/RiskOpportunity/Create.vue')),
+routeModel.appendUserRoute(prop, '.risk-and-opportunity-update', '/staff/risk-and-opportunity/:view/update', 'Update Risk and Opportunity', userType, () => import('@/views/Module/RiskOpportunity/Update.vue'))
 ]

@@ -6,7 +6,9 @@ const dashboard = [
 const qms = [
     { name: 'Procedures', url: prop + '.procedures' },
     { name: 'Forms', url: prop + '.general-forms' },
-    { name: 'Mission and Vision', url: prop + '.mission-and-vision' }
+    { name: 'Mission and Vision', url: prop + '.mission-and-vision' },
+    { name: 'Risk Assessment', url: prop + '.risk-and-opportunity' },
+    { name: 'Quality Objective', url: prop + '.maintenance-view' },
 ]
 
 
